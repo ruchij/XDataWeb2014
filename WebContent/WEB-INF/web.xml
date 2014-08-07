@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+  <display-name>XDataWeb2013</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+  
+  <servlet>
+    <servlet-name>LoginChecker</servlet-name>
+    <servlet-class>LoginChecker</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>LoginChecker</servlet-name>
+    <url-pattern>/LoginChecker</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>Assignment</servlet-name>
+    <servlet-class>Assignment</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Assignment</servlet-name>
+    <url-pattern>/Assignment</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>AssignmentChecker</servlet-name>
+    <servlet-class>AssignmentChecker</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>AssignmentChecker</servlet-name>
+    <url-pattern>/AssignmentChecker</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>AssignmentOptions</servlet-name>
+    <servlet-class>AssignmentOptions</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>AssignmentOptions</servlet-name>
+    <url-pattern>/AssignmentOptions</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>InitAssignment</servlet-name>
+    <servlet-class>InitAssignment</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>InitAssignment</servlet-name>
+    <url-pattern>/InitAssignment</url-pattern>
+  </servlet-mapping>
+    <servlet>
+    <servlet-name>QueryStatus</servlet-name>
+    <servlet-class>QueryStatus</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>QueryStatus</servlet-name>
+    <url-pattern>/QueryStatus</url-pattern>
+  </servlet-mapping>
+    <servlet>
+    <servlet-name>SessionFilter</servlet-name>
+    <servlet-class>SessionFilter</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>SessionFilter</servlet-name>
+    <url-pattern>/SessionFilter</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>ShowDatasets</servlet-name>
+    <servlet-class>ShowDatasets</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ShowDatasets</servlet-name>
+    <url-pattern>/ShowDatasets</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>SQLChecker</servlet-name>
+    <servlet-class>SQLChecker</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>SQLChecker</servlet-name>
+    <url-pattern>/SQLChecker</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>StudentAssignment</servlet-name>
+    <servlet-class>StudentAssignment</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>StudentAssignment</servlet-name>
+    <url-pattern>/StudentAssignment</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>StudentTestCase</servlet-name>
+    <servlet-class>StudentTestCase</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>StudentTestCase</servlet-name>
+    <url-pattern>/StudentTestCase</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>TestCaseDataset</servlet-name>
+    <servlet-class>TestCaseDataset</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>TestCaseDataset</servlet-name>
+    <url-pattern>/TestCaseDataset</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>ViewAssignment</servlet-name>
+    <servlet-class>ViewAssignment</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ViewAssignment</servlet-name>
+    <url-pattern>/ViewAssignment</url-pattern>
+  </servlet-mapping>
+  
+   <servlet>
+    <servlet-name>ViewReport</servlet-name>
+    <servlet-class>ViewReport</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ViewReport</servlet-name>
+    <url-pattern>/ViewReport</url-pattern>
+  </servlet-mapping>
+  
+   <servlet>
+    <servlet-name>UpdateServlet</servlet-name>
+    <servlet-class>database.UpdateServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>UpdateServlet</servlet-name>
+    <url-pattern>/UpdateServlet</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>EvaluateQuestion</servlet-name>
+    <servlet-class>EvaluateQuestion</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>EvaluateQuestion</servlet-name>
+    <url-pattern>/EvaluateQuestion</url-pattern>
+  </servlet-mapping>
+ <!--  <filter>
+    	<filter-name>SessionFilter</filter-name>
+    	<filter-class>SessionFilter</filter-class>
+	</filter>
+	
+	<filter-mapping>
+    	<filter-name>SessionFilter</filter-name>
+    	<url-pattern>/*</url-pattern> 
+    </filter-mapping>  -->
+</web-app>
