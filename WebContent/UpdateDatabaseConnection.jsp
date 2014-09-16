@@ -7,13 +7,11 @@
 <%@page import="java.sql.*"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
+<head> 
+ <link rel="stylesheet" href="css/structure.css" type="text/css"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>UPdate Database Connection</title>
 <style>
-html,body {
-	background: #ccc;
-}
 </style>
 </head>
 <body>
@@ -37,11 +35,12 @@ html,body {
 		String passwd2 = dbp.getPasswd2();
 		String hostname = dbp.getHostname();
 		String dbName = dbp.getDbName();
+		String port = dbp.getPortNumber();
 
 		Connection dbcon = null;
 
 		dbcon = (new DatabseConnection()).dbConnection(hostname, dbName,
-				username, passwd);
+				username, passwd, port);
 
 		try {
 			PreparedStatement stmt;

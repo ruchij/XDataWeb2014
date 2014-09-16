@@ -9,42 +9,20 @@
 <%@page import="database.DatabaseProperties"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
+<head> 
+ <link rel="stylesheet" href="../css/structure.css" type="text/css"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Assignment List</title>
-<script type="text/javascript" src="scripts/wufoo.js"></script>
-
-<!-- CSS -->
-<link rel="stylesheet" href="css/structure.css" type="text/css" />
-<link rel="stylesheet" href="css/form.css" type="text/css" />
-<link rel="stylesheet" href="css/theme.css" type="text/css" />
 
 <link rel="canonical"
 	href="http://www.wufoo.com/gallery/designs/template.html">
 <style>
-html,body {
-	margin: 0;
-	background: #ccc;
-}
 
 li {
 	text-align: left
 }
 
-body {
-	font: 12px/17px Arial, Helvetica, sans-serif;
-	color: #333;
-	background: #ccc;
-	padding: 0px 0px 0px 0px;
-}
 
-fieldset {
-	background: #f2f2e6;
-	padding: 10px;
-	border: 1px solid #fff;
-	border-color: #fff #666661 #666661 #fff;
-	margin-bottom: 36px;
-}
 
 textarea,select {
 	font: 12px/12px Arial, Helvetica, sans-serif;
@@ -62,17 +40,6 @@ fieldset.action {
 	margin-top: -20px;
 }
 
-legend {
-	background: #bfbf30;
-	color: #fff;
-	font: 17px/21px Calibri, Arial, Helvetica, sans-serif;
-	padding: 0 10px;
-	margin: -26px 0 0 -11px;
-	font-weight: bold;
-	border: 1px solid #fff;
-	border-color: #e5e5c3 #505014 #505014 #e5e5c3;
-	text-align: left;
-}
 
 label {
 	font-size: 15px;
@@ -85,23 +52,7 @@ label span,.required {
 	font-weight: bold;
 	font-size: 17px;
 }
-
-a:link {
-	color: #E96D63;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* unvisited link */
-a:visited {
-	color: #E96D63;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* visited link */
-a:hover {
-	color: #7FCA9F;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* mouse over link */
-a:active {
-	color: #85C1F5;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* selected link */
+ /* mouse over link */
 .stop-scrolling {
 	height: 100%;
 	overflow: hidden;
@@ -126,17 +77,19 @@ a:active {
 				String courseID = (String) request.getSession().getAttribute(
 						"context_label");
 				String assignID = (String) request.getParameter("assignmentid");
-				if (assignID == null)
+				
+				if (assignID == null){
 					assignID = (String) request.getSession().getAttribute(
 							"resource_link_id");
-					String instructions = (new CommonFunctions())
-							.getAssignmnetIinstructions(courseID, assignID);
+				}
+				
+				String instructions = (new CommonFunctions()).getAssignmnetIinstructions(courseID, assignID);
 					
-					out.println(instructions);
+				out.println(instructions);
 				%>
 			</fieldset>
-
-
+			
+			<br/>
 
 			<div>
 
@@ -148,8 +101,7 @@ a:active {
 							
 							String studentId = (String) request.getParameter("studentId");
 							if (studentId == null)
-								studentId = (String) request.getSession().getAttribute(
-										"user_id");
+								studentId = (String) request.getSession().getAttribute("user_id");
 
 							//get database properties
 							DatabaseProperties dbp = new DatabaseProperties();
@@ -159,10 +111,11 @@ a:active {
 							String passwd2 = dbp.getPasswd2();
 							String hostname = dbp.getHostname();
 							String dbName = dbp.getDbName();
-
+							String port = dbp.getPortNumber();
+							
 							//get connection
 							Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-									dbName, username, passwd);
+									dbName, username, passwd, port);
 							String output = "";
 							//int assignID;
 							boolean start = true;
@@ -179,14 +132,10 @@ a:active {
 								PreparedStatement stmt;
 								stmt = dbcon
 										.prepareStatement("SELECT * FROM  assignment where assignmentid = ? and courseid = ?");
-								stmt.setString(
-										1,
-										(String) request.getSession().getAttribute(
-												"resource_link_id"));
-								stmt.setString(
-										2,
-										(String) request.getSession().getAttribute(
-												"context_label"));
+								stmt.setString(1, assignID);
+								stmt.setString(2, courseID);
+								
+								System.out.println("DEBUG" + stmt);
 
 								ResultSet rs;
 								rs = stmt.executeQuery();

@@ -7,7 +7,8 @@
     pageEncoding="UTF-8"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
+<head> 
+ <link rel="stylesheet" href="css/structure.css" type="text/css"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>
 XData &middot; Assignment
@@ -68,9 +69,10 @@ XData &middot; Assignment
 	String passwd2 = dbp.getPasswd2();
 	String hostname = dbp.getHostname();
 	String dbName = dbp.getDbName();
+	String port = dbp.getPortNumber();
 	
 	//get the connection for testing1
-    Connection dbcon=(new DatabseConnection()).dbConnection(hostname, dbName,username,passwd);
+    Connection dbcon=(new DatabseConnection()).dbConnection(hostname, dbName, username, passwd, port);
 	
 	try{
 		

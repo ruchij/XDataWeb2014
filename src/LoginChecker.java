@@ -1,7 +1,5 @@
 
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -10,16 +8,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Hashtable;
 import java.util.StringTokenizer;
 
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-//import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +24,7 @@ import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPEntry;
 import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPException;
 import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPReferralException;
 import com.unboundid.ldap.sdk.migrate.ldapjdk.LDAPSearchResults;
+import database.DatabaseProperties;
 
 /**
  * Servlet implementation class LoginChecker
@@ -137,18 +130,19 @@ public class LoginChecker extends HttpServlet {
 		String uname="";
 		String pwd="";
 	    
-		
-		String loginUser = "testing1"; //change user name according to your db user
-		String loginPasswd = "testing1"; //change user passwd according to your db user passwd
-		String hostname="localhost";
-		String dbName="xdata";
+		DatabaseProperties dbp=new DatabaseProperties();
+		String loginUser = dbp.getUsername1(); //change user name according to your db user
+		String loginPasswd = dbp.getPasswd1(); //change user passwd according to your db user passwd
+		String hostname= dbp.getHostname();
+		String dbName= dbp.getDbName();;
+		String port = dbp.getPortNumber();
 
 		try {
 			Class.forName("org.postgresql.Driver");
 		} catch (ClassNotFoundException e1) {
 			e1.printStackTrace();
 		}
-		String loginUrl = "jdbc:postgresql://" + hostname +  "/" + dbName;
+		String loginUrl = "jdbc:postgresql://" + hostname + ":" + port + "/" + dbName;
 		try {
 			dbcon = DriverManager.getConnection(loginUrl, loginUser, loginPasswd);
 			if(dbcon!=null){
@@ -176,14 +170,16 @@ public class LoginChecker extends HttpServlet {
 	    		pwd=(String) session.getAttribute("pwd");
 	    }
 			
-		if(uname.equalsIgnoreCase("instructor")&&pwd.equalsIgnoreCase("xdata!@#"))
+		if((uname.equalsIgnoreCase("instructor")&&pwd.equalsIgnoreCase("xdata!@#")) || (uname.equalsIgnoreCase("student") &&pwd.equalsIgnoreCase("icde")))
 		{
 			response.setContentType("text/html");
 			PrintWriter out2 = response.getWriter();
 			
-			session.setAttribute("LOGIN_USER", "ADMIN"); 
+			if(uname.equalsIgnoreCase("instructor")){
+				session.setAttribute("LOGIN_USER", "ADMIN"); 
+			}
 			
-			response.sendRedirect("instructorOptions.html");
+			response.sendRedirect("Empty.html");
 			
 			return;
 			/*BufferedReader reader = new BufferedReader(new FileReader(request.getSession().getServletContext().getRealPath("/")+"/instructorOptions.html"));
@@ -193,6 +189,21 @@ public class LoginChecker extends HttpServlet {
 			}
 			out2.close();
 			return;*/
+		}
+		else{
+			session.invalidate();
+			response.setContentType("text/html");
+			/*PrintWriter out2 = response.getWriter();
+			out2.println("<html>"+
+					"<header><title>Error</title></header>"+
+					"<body>"+
+					"Invalid username/password"+
+					"</body>"+
+					"</html>");
+			out2.close();*/
+			
+			response.sendRedirect("index.html?Login=false");
+			return;
 		}
 /*		if(!LdapAuthentication(uname,pwd).equalsIgnoreCase("ok"))
 		{
@@ -211,7 +222,7 @@ public class LoginChecker extends HttpServlet {
 		
 
 	
-       	response.setContentType("text/html");
+       	/*response.setContentType("text/html");
 		PrintWriter out_assignment = response.getWriter();
 		out_assignment.println("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\""+
 				"\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">"+
@@ -307,7 +318,7 @@ public class LoginChecker extends HttpServlet {
 		try{
 			dbcon.close();
 		} catch(SQLException e){}
-		catch(NullPointerException e){}
+		catch(NullPointerException e){}*/
        	
 	}
 	

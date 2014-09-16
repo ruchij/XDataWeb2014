@@ -9,31 +9,15 @@
 <%@page import="database.DatabaseProperties"%>
 
 <html>
-<head>
+<head> 
+ <link rel="stylesheet" href="../css/structure.css" type="text/css"/>
+
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Details of the Question</title>
 
 <style>
-html,body {
-	margin: 0;
-	width: 100%;
-	height: 100%;
-}
 
-body {
-	font: 12px/17px Arial, Helvetica, sans-serif;
-	color: #333;
-	background: #ccc;
-	padding: 0px 0px 0px 0px;
-}
 
-fieldset {
-	background: #f2f2e6;
-	padding: 10px;
-	border: 1px solid #fff;
-	border-color: #fff #666661 #666661 #fff;
-	margin-bottom: 36px;
-}
 
 textarea,select {
 	font: 12px/12px Arial, Helvetica, sans-serif;
@@ -51,17 +35,6 @@ fieldset.action {
 	margin-top: -20px;
 }
 
-legend {
-	background: #bfbf30;
-	color: #fff;
-	font: 17px/21px Calibri, Arial, Helvetica, sans-serif;
-	padding: 0 10px;
-	margin: -26px 0 0 -11px;
-	font-weight: bold;
-	border: 1px solid #fff;
-	border-color: #e5e5c3 #505014 #505014 #e5e5c3;
-	text-align: left;
-}
 
 label {
 	font-size: 15px;
@@ -79,18 +52,10 @@ a:link {
 	color: #E96D63;
 	font: 15px/15px Arial, Helvetica, sans-serif;
 } /* unvisited link */
-a:visited {
-	color: #E96D63;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* visited link */
 a:hover {
 	color: #7FCA9F;
 	font: 15px/15px Arial, Helvetica, sans-serif;
 } /* mouse over link */
-a:active {
-	color: #85C1F5;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* selected link */
 .stop-scrolling {
 	height: 100%;
 	overflow: hidden;
@@ -135,6 +100,7 @@ a:active {
 				<p></p>
 				<p></p>
 			</fieldset>
+			<br/>
 			<fieldset>
 				<legend> Question Details</legend>
 
@@ -154,10 +120,11 @@ a:active {
 					String passwd2 = dbp.getPasswd2();
 					String hostname = dbp.getHostname();
 					String dbName = dbp.getDbName();
+					String port = dbp.getPortNumber();
 
 					//get connection
 					Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-							dbName, username, passwd);
+							dbName, username, passwd, port);
 
 					String output = "";
 
@@ -179,24 +146,12 @@ a:active {
 						//stmt = dbcon.prepareStatement("SELECT * FROM  qinfo ,assignment where qinfo.assignment_id=? AND qinfo.assignment_id=assignment.assignment_id");
 						stmt = dbcon
 								.prepareStatement("SELECT * FROM  qinfo  where qinfo.assignmentid=? and qinfo.courseid=? and qinfo.questionid=?");
-						stmt.setString(
-								1,
-								(String) request.getSession().getAttribute(
-										"resource_link_id"));
-						stmt.setString(
-								2,
-								(String) request.getSession().getAttribute(
-										"context_label"));
-						stmt.setString(3, (String) request.getParameter("questionId")
-								.trim());
-						System.out.println("QId :"
-								+ (String) request.getParameter("questionId"));
-						System.out.println("Course Id: "
-								+ (String) request.getSession().getAttribute(
-										"context_label"));
-						System.out.println("AssId :"
-								+ (String) request.getSession().getAttribute(
-										"resource_link_id"));
+						stmt.setString(1, assignID);
+						stmt.setString(2, (String) request.getSession().getAttribute("context_label"));
+						stmt.setString(3, (String) request.getParameter("questionId").trim());
+						System.out.println("QId :"	+ (String) request.getParameter("questionId"));
+						System.out.println("Course Id: " + (String) request.getSession().getAttribute("context_label"));
+						System.out.println("AssId :" + assignID);
 
 						ResultSet rs = stmt.executeQuery();
 						String qID = (String) request.getParameter("questionId");
@@ -248,79 +203,23 @@ a:active {
 								String studentAnswer = "";
 								if (rs1.next())
 									studentAnswer = rs1.getString("querystring");
-
-								/* 	output += "<tr> <td> <label><input type=\"number\" name=\"qID\" size=\"4\" id=\"qID"
-											+ qID
-											+ "\" value=\""
-											+ qID
-											+ "\" readonly></label> </td>"; */
-
-								output += "<tr> \n <td> <p align=\"center\" name=\"qID\" id=\"qID"
-										+ qID + "\" >" + qID + "</p> </td> \n";
-
-								output += "<td> <label name=\"quesTxt\"  id=\"quesTxt"
-										+ qID + "\" >" + description
-										+ " </label> </td>";
-
-								String id = "<input type=\"button\" name=\"button "
-										+ studentId + " " + assignID + " " + qID
-										+ "\" ";
-
-								if (readOnly) {
-									output += " <td><label name=\"query\" id=\"query"
-											+ qID
-											+ "\"rows=\"6\" cols=\"35\" readonly> "
-											+ studentAnswer + "</textarea></td> ";
-									/* 	output += "<td>  <select onClick=\"report(this)\" name=\"button\" id=\"button "
-												+ studentId
-												+ " "
-												+ qID
-												+ " "
-												+ assignID
-												+ "\"required>"
-												+ "<option value=\"0\"> Select Option</option>"
-												+ "<option value=\"2\"> List Questions</option>"
-												+ "<option value=\"3\"> View Grades</option>"
-												+ "</td>"; */
-
-									String buttons = id + " onClick=\"report(this,2)\""
-											+ " value=\"View Grades\" ><br/>\n";
-
-									output += "<td>" + buttons + "</td>\n</tr>\n";
-								} else {
-									output += " <td><textarea name=\"query\" id=\"query"
-											+ qID
-											+ "\"rows=\"6\" cols=\"35\" > "
-											+ studentAnswer + "</textarea></td> ";
-									/* 	output = output
-												.concat("<td> <input type=\"button\" id=\"button "
-														+ qID +" "+assignID
-														+ "\" value=\"Generate Dataset\" onclick=\"submitter(this,'queryTable')\"> </td></tr>"
-														+ "\n");
-									 */
-
-									/* 	output += "<td>  <select onChange=\"window.location.href=this.value\" name=\"button\" id=\"button "+ qID +" "+assignID+ "\"required>" + 
-											"<option value=\"Select\"> Select Option</option>"+
-											"<option value=\"QuestionDetails.jsp?AssignmentID="+assignID + 
-											"&&courseId="+ courseID+ "&&questionId="+ qID+ " \">Update Query</option>" +
-											"<option value=\"submitter(this,'queryTable')\">Generate Dataset</option> "+
-											"<td> "; */
-
-									/* output += "<td>  <select onClick=\"report(this)\" name=\"button\" id=\"button "
-											+ studentId
-											+ " "
-											+ qID
-											+ " "
-											+ assignID
-											+ "\"required>"
-											+ "<option value=\"0\"> Select Option</option>"
-											+ "<option value=\"1\"> Update Query</option>"
-											+ "<option value=\"2\"> List Questions</option>"
-											+ "</td>"; */
-									String buttons = id + " onClick=\"report(this,1)\""
-											+ " value=\"Submit Answer\" ><br/>\n";
-									output += "<td>" + buttons + "</td>\n</tr>\n";
-								}
+								if (readOnly) {%>
+									<div class="questionelement">
+										<div class="question"><span>Q<%= qID %>. </span><%= description %></div>
+										<div class="answer"><label name='query' id='query<%=qID %>'><%=studentAnswer %></label></div>
+										<div class="editbutton">
+										<input type="button" onClick="report(this,2)"  value="View Grades" name="button <%=studentId+" "+assignID+" "+qID%>"/>
+										</div>
+									</div>
+								<% } else {%>
+									<div class="questionelement">
+										<div class="question"><span>Q<%= qID %>. </span><%= description %></div>
+										<div class="answer"><textarea name='query' id='query<%=qID %>'><%=studentAnswer %></textarea></div>
+										<div class="editbutton">
+										<input type="button" onClick="report(this,1)"  value="Submit Answer" name="button <%=studentId+" "+assignID+" "+qID%>"/>
+										</div>
+									</div>
+								<%}
 								rs1.close();
 								
 							} catch (Exception err) {
@@ -330,8 +229,6 @@ a:active {
 							rs2.close();
 						}
 						rs.close();
-						output += "</table>";
-						out.println(output);
 					}
 
 					catch (Exception err) {

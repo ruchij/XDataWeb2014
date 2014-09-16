@@ -71,14 +71,14 @@ public class StudentAssignment extends HttpServlet {
 		String loginPasswd = dbp.getPasswd1(); 
 		String hostname=dbp.getHostname();
 		String dbName=dbp.getDbName();
-		
+		String port = dbp.getPortNumber();
 		
 		try {
 			Class.forName("org.postgresql.Driver");
 		} catch (ClassNotFoundException e1) {
 			e1.printStackTrace();
 		}
-		String loginUrl = "jdbc:postgresql://" + hostname +  "/" + dbName;
+		String loginUrl = "jdbc:postgresql://" + hostname + ":" + port + "/" + dbName;
 		try {
 			dbCon = DriverManager.getConnection(loginUrl, loginUser, loginPasswd);
 			if(dbCon!=null){

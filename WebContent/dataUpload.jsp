@@ -7,7 +7,8 @@
 <%@page import="database.DatabaseProperties" %>
  <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
+<head> 
+ <link rel="stylesheet" href="css/structure.css" type="text/css"/>
 <meta http-equiv="refresh" content="0;url=instructorOptions.html" />
 <title>Assignment List</title>
 <script type="text/javascript" src="scripts/wufoo.js"></script>
@@ -19,31 +20,6 @@
 
 <link rel="canonical" href="http://www.wufoo.com/gallery/designs/template.html">
 <style>
-body {font:12px/17px Arial, Helvetica, sans-serif; color:#333; background:#ccc; padding:40px 20px 20px 20px;}
-
-</style>
-</head>
-<body class="form" >
-<%
-//TODO THIS CODE is taken from internet. File uploading code has to be modified for multiple files and it has to be kept in some java file and import it
-      String saveFile = "";
-		int x=0;
-	  //to get the content type information from JSP Request Header
-      String contentType = request.getContentType();
-      int schemaId = Integer.parseInt(request.getParameter("schemaid"));
-    //here we are checking the content type is not equal to Null and as well as the passed data from mulitpart/form-data is greater than or equal to 0
-      if ((contentType != null) && (contentType.indexOf("multipart/form-data") >= 0)) {
-            DataInputStream in = new DataInputStream(request.getInputStream());
-          //we are taking the length of Content type data
-            int formDataLength = request.getContentLength();
-            byte dataBytes[] = new byte[formDataLength];
-            int byteRead = 0;
-            int totalBytesRead = 0;
-          //this loop converting the uploaded file into byte code
-            while (totalBytesRead < formDataLength) {
-                  byteRead = in.read(dataBytes, totalBytesRead, formDataLength);
-                  totalBytesRead += byteRead;
-            }
           //for saving the file name
             String file = new String(dataBytes);
             saveFile = file.substring(file.indexOf("filename=\"") + 10);
@@ -80,13 +56,13 @@ body {font:12px/17px Arial, Helvetica, sans-serif; color:#333; background:#ccc; 
 			String passwd2=dbp.getPasswd2();
 			String hostname=dbp.getHostname();
 			String dbName=dbp.getDbName();
-			
+			String port = dbp.getPortNumber();
 	     
 			//now execute this script for testing1
 			ArrayList<String> listOfQueries=(new FileToSql()).createQueries(saveFile);
 			String[] inst = listOfQueries.toArray(new String[listOfQueries.size()]);
 	        //get the connection for testing1
-	        Connection dbcon=(new DatabseConnection()).dbConnection(hostname, dbName,username,passwd);			
+	        Connection dbcon=(new DatabseConnection()).dbConnection(hostname, dbName, username, passwd, port);			
 	        
 	        try{
 	        	

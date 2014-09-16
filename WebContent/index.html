@@ -14,12 +14,37 @@
 	<link rel="stylesheet" href="css/reset.css">
 	<link rel="stylesheet" href="css/animate.css">
 	<link rel="stylesheet" href="css/styles.css">
+	<script type="text/javascript" src = "scripts/jquery.js"></script>
+	
+	
+	<script type="text/javascript">
+
+		function getParameterByName(name) {
+		    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+		    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+		        results = regex.exec(location.search);
+		    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+		}
+		
+		$( document ).ready(function() {
+			if(getParameterByName("Login") != "" ){
+				$('#loginMessage').show();
+			}
+			else{
+				$('#loginMessage').hide();
+			}
+		});
+
+	</script>
 	
 </head>
+
 
 	<!-- Main HTML -->
 	
 <body>
+
+	
 	
 	<!-- Begin Page Content -->
 	
@@ -27,7 +52,7 @@
 		
 		<form action="LoginChecker" method="post">
 		
-		<label for="name">Ldap ID:</label>
+		<label for="name">Username:</label>
 		
 		<input type="name" name="name">
 		
@@ -35,9 +60,9 @@
 		
 		<input type="password" name="password">
 		
-		<div id="lower">
+		<label id="loginMessage">The username or password you entered is incorrect.</label>
 		
-		<input type="checkbox"><label class="check" for="checkbox">Keep me logged in</label>
+		<div id ="lower">
 		
 		<input type="submit" value="Login">
 		

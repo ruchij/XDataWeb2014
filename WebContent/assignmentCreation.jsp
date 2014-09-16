@@ -1,12 +1,14 @@
 <%@ page language="java" %>
 <%@page import="java.io.*"%>
 <%@page import="java.sql.*"%>
+<%@page import="database.DatabaseProperties" %>
 
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
+<head> 
+ <link rel="stylesheet" href="css/structure.css" type="text/css"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Add Assignment</title>
 </head>
@@ -46,12 +48,15 @@
     	System.exit(1);
 	}
 
-	// JDBC Connection establishment		
-	String loginUser = "testing1"; //change user name according to your db user
-	String loginPasswd = "testing1"; //change user passwd according to your db user passwd
-	String hostname="localhost";
-	String dbName="xdata";
-	String loginUrl = "jdbc:postgresql://" + hostname +  "/" + dbName;
+	// JDBC Connection establishment
+	DatabaseProperties dbp=new DatabaseProperties();
+	String loginUser = dbp.getUsername1(); //change user name according to your db user
+	String loginPasswd = dbp.getPasswd1(); //change user passwd according to your db user passwd
+	String hostname = dbp.getHostname();
+	String dbName = dbp.getDbName();
+	String port = dbp.getPortNumber();
+	
+	String loginUrl = "jdbc:postgresql://" + hostname + ":" + port + "/" + dbName;
      
 
 	Connection dbcon=null;

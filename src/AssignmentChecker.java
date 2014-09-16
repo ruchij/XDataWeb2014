@@ -16,7 +16,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
 import database.CommonFunctions;
+import database.DatabaseProperties;
 import testDataGen.GenerateDataset_new;
 import testDataGen.PopulateTestData;
 
@@ -62,17 +64,19 @@ public class AssignmentChecker extends HttpServlet {
 		HttpSession session=request.getSession();
 		session.setAttribute("question_id", question_id);
 		session.setAttribute("assignment_id", assignment_id);
-		 String loginUser = "testing1"; //change user name according to your db user
-	        String loginPasswd = "testing1"; //change user passwd according to your db user passwd
-	        String hostname="localhost";
-	        String dbName="xdata";
+		DatabaseProperties dbp=new DatabaseProperties();
+		String loginUser = dbp.getUsername1(); //change user name according to your db user
+		String loginPasswd = dbp.getPasswd1(); //change user passwd according to your db user passwd
+		String hostname= dbp.getHostname();
+		String port = dbp.getPortNumber();
+		String dbName= dbp.getDbName();;
 	        try {
 				Class.forName("org.postgresql.Driver");
 			} catch (ClassNotFoundException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-	        String loginUrl = "jdbc:postgresql://" + hostname +  "/" + dbName;
+	        String loginUrl = "jdbc:postgresql://" + hostname + ":" + port + "/" + dbName;
 			     
 	        
 		    Connection dbcon=null;
@@ -139,17 +143,18 @@ public class AssignmentChecker extends HttpServlet {
             System.out.println(s);
         }*/
        	
-        loginUser = "testing2"; //change user name according to your db user
-        loginPasswd = "testing2"; //change user passwd according to your db user passwd
-        hostname="localhost";
-        dbName="xdata";
+		dbp=new DatabaseProperties();
+		loginUser = dbp.getUsername2(); //change user name according to your db user
+		loginPasswd = dbp.getPasswd2(); //change user passwd according to your db user passwd
+		hostname= dbp.getHostname();
+		dbName= dbp.getDbName();;
         try {
 			Class.forName("org.postgresql.Driver");
 		} catch (ClassNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-        loginUrl = "jdbc:postgresql://" + hostname +  "/" + dbName;
+        loginUrl = "jdbc:postgresql://" + hostname + ":" + port + "/" + dbName;
 		     
         
 	    Connection testcon=null;

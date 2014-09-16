@@ -13,6 +13,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import database.DatabaseProperties;
 
 /**
  * Servlet implementation class InitAssignment
@@ -43,16 +44,18 @@ public class InitAssignment extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		
-    	String loginUser = "testing1"; //change user name according to your db user
-		String loginPasswd = "testing1"; //change user passwd according to your db user passwd
-		String hostname="localhost";
-		String dbName="xdata";
+		DatabaseProperties dbp=new DatabaseProperties();
+    	String loginUser = dbp.getUsername1(); //change user name according to your db user
+		String loginPasswd = dbp.getPasswd1(); //change user passwd according to your db user passwd
+		String hostname = dbp.getHostname();
+		String dbName = dbp.getDbName();;
+		String port = dbp.getPortNumber();
 		try {
 			Class.forName("org.postgresql.Driver");
 		} catch (ClassNotFoundException e1) {
 			e1.printStackTrace();
 		}
-		String loginUrl = "jdbc:postgresql://" + hostname +  "/" + dbName;
+		String loginUrl = "jdbc:postgresql://" + hostname + ":" + port + "/" + dbName;
 		try {
 			dbCon = DriverManager.getConnection(loginUrl, loginUser, loginPasswd);
 			if(dbCon!=null){

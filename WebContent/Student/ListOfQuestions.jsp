@@ -9,32 +9,14 @@
 <%@page import="database.DatabaseProperties"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
+<head> 
+ <link rel="stylesheet" href="../css/structure.css" type="text/css"/>
+
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>List Of Questions</title>
 <style>
-html,body {
-	margin: 0;
-	width: 100%;
-	height: 100%;
-}
 
-body {
-	font: 12px/17px Arial, Helvetica, sans-serif;
-	color: #333;
-	background: #ccc;
-	padding: 0px 0px 0px 0px;
-}
 
-fieldset {
-	background: #f2f2e6;
-	padding: 10px;
-	border: 1px solid #fff;
-	border-color: #fff #666661 #666661 #fff;
-	margin-bottom: 36px;
-	width: 93%;
-	height: 100%;
-}
 
 textarea,select {
 	font: 12px/12px Arial, Helvetica, sans-serif;
@@ -52,17 +34,6 @@ fieldset.action {
 	margin-top: -20px;
 }
 
-legend {
-	background: #bfbf30;
-	color: #fff;
-	font: 17px/21px Calibri, Arial, Helvetica, sans-serif;
-	padding: 0 10px;
-	margin: -26px 0 0 -11px;
-	font-weight: bold;
-	border: 1px solid #fff;
-	border-color: #e5e5c3 #505014 #505014 #e5e5c3;
-	text-align: left;
-}
 
 label {
 	font-size: 15px;
@@ -76,22 +47,6 @@ label span,.required {
 	font-size: 17px;
 }
 
-a:link {
-	color: #E96D63;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* unvisited link */
-a:visited {
-	color: #E96D63;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* visited link */
-a:hover {
-	color: #7FCA9F;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* mouse over link */
-a:active {
-	color: #85C1F5;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* selected link */
 .stop-scrolling {
 	height: 100%;
 	overflow: hidden;
@@ -110,13 +65,16 @@ a:active {
 				<legend> Assignment Instructions</legend>
 				<ul>
 					<li>Click edit to enter your answer</li>
+					<li>On editing, the query will be run against datasets</li>
+					<li>You will be forwarded to a page where the result of submission would be shown</li> 
+					<li>You can see the details of the schema being used <a href='http://www.cse.iitb.ac.in/infolab/xdata/universitySchema.pdf' target='_blank'>here</a></li>
 				</ul>
 				<p></p>
 				<p></p>
 			</fieldset>
+			<br/> 	
 			<fieldset>
 				<legend> List of Questions</legend>
-
 				<%
 					String assignID = (String) request.getParameter("AssignmentID");
 					String courseID = (String) request.getSession().getAttribute(
@@ -137,9 +95,11 @@ a:active {
 					String passwd2 = dbp.getPasswd2();
 					String hostname = dbp.getHostname();
 					String dbName = dbp.getDbName();
+					String port = dbp.getPortNumber();
+					
 					//get connection
 					Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-							dbName, username, passwd);
+							dbName, username, passwd, port);
 
 					Timestamp start = null;
 					Timestamp end = null;
@@ -185,7 +145,8 @@ a:active {
 						yes = true;
 					}
 
-					String output = "<table  cellspacing=\"20\"  class=\"authors-list\" id=\"queryTable\" align=\"center\"> <tr> <th >Question ID</th>       <th >Question Description</th>  <th >Your Answer</th> <th> </th></tr>";
+					//String output = "<table  cellspacing=\"20\"  class=\"authors-list\" id=\"queryTable\" align=\"center\"> <tr> <th >Question ID</th>       <th >Question Description</th>  <th >Your Answer</th> <th> </th></tr>";
+					String output= "";
 					try {
 						PreparedStatement stmt;
 						//stmt = dbcon.prepareStatement("SELECT * FROM  qinfo ,assignment where qinfo.assignment_id=? AND qinfo.assignment_id=assignment.assignment_id");
@@ -211,7 +172,7 @@ a:active {
 							String studentAnswer = "";
 							if (rs1.next())
 								studentAnswer = rs1.getString("querystring");
-
+	
 							String remote = "QuestionDetails.jsp?AssignmentID="
 									+ assignID + "&&courseId=" + courseID
 									+ "&&questionId=" + qID + "&&studentId="
@@ -221,7 +182,7 @@ a:active {
 									+ assignID + "&&courseId=" + courseID
 									+ "&&questionId=" + qID + "&&studentId="
 									+ studentId + "'\"target = \"rightPage\"";
-							if (yes == false)
+							if (yes == false){
 								output += "<tr><td>Question: "
 										+ qID
 										+ "</td>"
@@ -233,46 +194,50 @@ a:active {
 										+ "</td>"
 										+ "<td><input type=\"button\" onClick=\"window.location.href='"
 										+ remote + " value=\"Edit\" > <br/> \n ";
-							else
-								output += "<tr><td>Question: "
-										+ qID
-										+ "</td>"
-										+ "<td>"
-										+ desc
-										+ "</td>"
-										+ "<td>"
-										+ CommonFunctions.encodeHTML(studentAnswer)
+							}
+							else{
+								output += CommonFunctions.encodeHTML(studentAnswer)
 										+ "</td>"
 										+ "<td><input type=\"button\" onClick=\"window.location.href='"
 										+ viewGrade
 										+ " value=\"View Grade\" > <br/> \n ";
-
-							/* 	
-							output += "<p><a href=\"QuestionDetails.jsp?AssignmentID="
-										+ assignID
-										+ "&&courseId="
-										+ courseID
-										+ "&&questionId="
-										+ qID
-										+ "&&studentId="
-										+ studentId
-										+ "\" target = \"rightPageBottom\"><span > Question "
-										+ qID + " </span> "; */
+						}
 							rs1.close();
+						%>
+							
+							<div class="questionelement">
+								<div class="question"><span>Q<%= qID %>. </span><%= desc %></div>
+								<div class="answer"><span>Ans. </span><%= CommonFunctions.encodeHTML(studentAnswer) %></div>
+								<div class="editbutton"><a href=' <%=yes?viewGrade:remote %>'>
+								<%=yes?"View Grade":"Edit" %></a></div>
+							</div>
+						<%
 
 						}
 						rs.close();
-						output += "</table>";
+						output = "";
 						
 						if(status != null){
 							if(status.equals("NoDataset")){
 								
 							}
 							else if(status.equals("Correct")){
-								output += "<p>Passed basic test cases</p>";
+								output += "<p>Passed test cases</p>";
+							}
+							else if(status.equals("Error")){
+								output += "<p style=\"color:red;\">Error occurred. Please ensure:</p>"
+										+"<ul>"
+										+ "<li>The query syntax is correct</li>"
+										+"<ul>";
 							}
 							else if(status.equals("Incorrect")){
-								output += "<p>Test case failed. Check again.</p>";
+								output += "<p style=\"color:red;\">Test case failed. Please ensure:</p>"
+										+"<ul><li>You have submitted only the query without any comments or	results</li>"
+										+ "<li>The query syntax is correct</li>"
+										+ "<li>The query does not use any specific schema name</li>"
+										+ "<li>The order of projected columns</li>"
+										+ "<li>Check query predicates</li>"
+										+"<ul>";
 							}
 							else if(status.equals("expired")){
 								output += "<p>Submission not saved. Assignment expired.</p>";

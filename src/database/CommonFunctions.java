@@ -207,9 +207,10 @@ public class CommonFunctions {
 				String passwd2 = dbp.getPasswd2();
 				String hostname = dbp.getHostname();
 				String dbName = dbp.getDbName();
+				String port = dbp.getPortNumber();
+				
 				//get connection
-				Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-						dbName, username, passwd);
+				Connection dbcon = (new DatabseConnection()).dbConnection(hostname,	dbName, username, passwd, port);
 				Timestamp start = null;
 				Timestamp end = null;
 
@@ -306,6 +307,8 @@ public class CommonFunctions {
 
 	    try
 	    {
+	      s = s.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
+	      s = s.replaceAll("\\+", "%2B");
 	      result = URLDecoder.decode(s, "UTF-8");
 	    }
 

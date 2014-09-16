@@ -2,6 +2,17 @@ addEvent(window, 'load', initForm);
 
 var highlight_array = new Array();
 
+function toggleDataset(id){
+	$(id).toggle();
+
+	if($(id).parent().children()[0].innerHTML=="View Dataset"){
+		$(id).parent().children()[0].innerHTML="Hide Dataset";
+	}
+	else{
+		$(id).parent().children()[0].innerHTML="View Dataset";
+	}
+}
+
 function initForm(){
 	initializeFocus();
 	var activeForm = document.getElementsByTagName('form')[0];
