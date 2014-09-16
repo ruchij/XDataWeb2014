@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import database.DatabaseProperties;
 import testDataGen.PopulateTestData;
 
 /**
@@ -42,17 +43,20 @@ public class TestCaseDataset extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		String query=request.getParameter("query");
-        String loginUser = "testing2"; //change user name according to your db user
-        String loginPasswd = "testing2"; //change user passwd according to your db user passwd
-        String hostname="localhost";
-        String dbName="xdata";
+		DatabaseProperties dbp=new DatabaseProperties();
+		String loginUser = dbp.getUsername2(); //change user name according to your db user
+		String loginPasswd = dbp.getPasswd2(); //change user passwd according to your db user passwd
+		String hostname= dbp.getHostname();
+		String dbName= dbp.getDbName();
+		String port = dbp.getPortNumber();
+		
         try {
 			Class.forName("org.postgresql.Driver");
 		} catch (ClassNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-        String loginUrl = "jdbc:postgresql://" + hostname +  "/" + dbName;
+        String loginUrl = "jdbc:postgresql://" + hostname + ":" + port + "/" + dbName;
 		     
 		   Connection testcon=null;
 			  //  System.out.println(LdapAuthentication());
@@ -76,10 +80,11 @@ public class TestCaseDataset extends HttpServlet {
 		Connection dbCon=(Connection) session.getAttribute("dbConnection");
 		if(dbCon==null)
 		{
-			 loginUser = "testing1";
-			 loginPasswd = "testing1"; 
-			 hostname="localhost";
-			 dbName="xdata";
+			dbp=new DatabaseProperties();
+			loginUser = dbp.getUsername1(); //change user name according to your db user
+			loginPasswd = dbp.getPasswd1(); //change user passwd according to your db user passwd
+			hostname= dbp.getHostname();
+			dbName= dbp.getDbName();;
 			 	try {
 		    	     // Class.forName("org.postgresql.Driver");
 		       		dbCon = DriverManager.getConnection(loginUrl, loginUser, loginPasswd);

@@ -41,8 +41,9 @@ public class QueryStatus extends HttpServlet {
 		String passwd2 = dbp.getPasswd2();
 		String hostname = dbp.getHostname();
 		String dbName = dbp.getDbName();
+		String port = dbp.getPortNumber();
 		
-		String loginUrl = "jdbc:postgresql://" + hostname +  "/" + dbName;
+		String loginUrl = "jdbc:postgresql://" + hostname + ":" + port + "/" + dbName;
 		
 		response.setContentType("text/html");
 		PrintWriter out_assignment = response.getWriter();

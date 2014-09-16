@@ -49,13 +49,15 @@ public class EvaluateQuestion extends HttpServlet {
 		String passwd2 = dbp.getPasswd2();
 		String hostname = dbp.getHostname();
 		String dbName = dbp.getDbName();
+		String port = dbp.getPortNumber();
+		
 		try {
 			Class.forName("org.postgresql.Driver");
 		} catch (ClassNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		String loginUrl = "jdbc:postgresql://" + hostname +  "/" + dbName;
+		String loginUrl = "jdbc:postgresql://" + hostname + ":" + port + "/" + dbName;
 
 
 		Connection dbcon=null;

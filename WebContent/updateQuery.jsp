@@ -5,7 +5,8 @@
 <%@page import="database.DatabaseProperties" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
+<head> 
+ <link rel="stylesheet" href="css/structure.css" type="text/css"/>
 <meta http-equiv="refresh" content="0;url=ListAllAssignments.html" />
 <title>Update Query</title>
 <script type="text/javascript" src="scripts/wufoo.js"></script>
@@ -48,10 +49,11 @@ background-color:#E6E6FA;
 		String passwd2 = dbp.getPasswd2();
 		String hostname = dbp.getHostname();
 		String dbName = dbp.getDbName();
+		String port = dbp.getPortNumber();
 	     
 		Connection dbcon=null;
 		
-	    dbcon=(new DatabseConnection()).dbConnection(hostname, dbName,username,passwd);	
+	    dbcon=(new DatabseConnection()).dbConnection(hostname, dbName, username, passwd, port);	
 		
 		//insert the details into queryInfo table
 		//Its schema is assignID,queryID,queryText,correctQuery

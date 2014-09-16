@@ -6,7 +6,8 @@
 <%@page import="database.DatabseConnection"%>
 <%@page import="database.DatabaseProperties"%>
 <%@page import="database.UpdateServlet"%>
-<head>
+<head> 
+ <link rel="stylesheet" href="css/structure.css" type="text/css"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <title>Create Assignment</title>
 <script type="text/javascript" src="scripts/newrow.js"></script>
@@ -14,27 +15,8 @@
 <script type="text/javascript" src="scripts/ManageQuery.js"></script>
 
 <style>
-html,body {
-	margin: 0;
-	width: 100%;
-	height: 100%;
-}
 
-body {
-	font: 12px/17px Arial, Helvetica, sans-serif;
-	color: #333;
-	background: #ccc;
-	padding: 40px 20px 20px 20px;
-}
 
-fieldset {
-	background: #f2f2e6;
-	padding: 10px;
-	border: 1px solid #fff;
-	border-color: #fff #666661 #666661 #fff;
-	margin-bottom: 36px;
-	width: 90%;
-}
 
 textarea,select {
 	font: 12px/12px Arial, Helvetica, sans-serif;
@@ -52,16 +34,6 @@ fieldset.action {
 	margin-top: -20px;
 }
 
-legend {
-	background: #bfbf30;
-	color: #fff;
-	font: 17px/21px Calibri, Arial, Helvetica, sans-serif;
-	padding: 0 10px;
-	margin: -26px 0 0 -11px;
-	font-weight: bold;
-	border: 1px solid #fff;
-	border-color: #e5e5c3 #505014 #505014 #e5e5c3;
-}
 
 label {
 	font-size: 15px;
@@ -85,16 +57,7 @@ nav ul li:hover {
 	background: -webkit-linear-gradient(top, #4f5964 0%, #5f6975 40%);
 }
 
-nav ul li:hover a {
-	color: #fff;
-}
 
-nav ul li a {
-	display: block;
-	padding: 25px 40px;
-	color: #757575;
-	text-decoration: none;
-}
 </style>
 
 <%
@@ -155,6 +118,7 @@ nav ul li a {
 	String passwd2 = dbp.getPasswd2();
 	String hostname = dbp.getHostname();
 	String dbName = dbp.getDbName();
+	String port = dbp.getPortNumber();
 
 	//get the assignment ID after updating the assignment table
 	//int assignID=0;
@@ -162,7 +126,7 @@ nav ul li a {
 	Connection dbcon = null;
 
 	dbcon = (new DatabseConnection()).dbConnection(hostname, dbName,
-			username, passwd);
+			username, passwd, port);
 
 	try {
 		PreparedStatement stmt, stmt1;

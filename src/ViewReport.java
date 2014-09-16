@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import database.DatabaseProperties;
+
 /**
  * Servlet implementation class ViewReport
  */
@@ -79,12 +81,19 @@ public class ViewReport extends HttpServlet {
 		String query="";
 		String english_desc="";
 		
+		DatabaseProperties dbp=new DatabaseProperties();
+		String loginUser = dbp.getUsername1(); //change user name according to your db user
+		String loginPasswd = dbp.getPasswd1(); //change user passwd according to your db user passwd
+		String hostname= dbp.getHostname();
+		String dbName= dbp.getDbName();
+		String port = dbp.getPortNumber();
+		
 		String sel_quest="select count(user_id), q_id from query where assignment_id=? and status='W' group by q_id";
 		String defect_dataset="select datasetid from detectdataset group by datasetid order by count(?) desc";
 		int no_of_wrong=0;
 		//String sel_perf="select count(*) from query where q_id=? and status='W'";
 		String q_info="select query, english_desc from qinfo where assignment_id=? and q_id=?";
-		Connection dbCon=(new database.DatabseConnection()).dbConnection("localhost", "xdata", "testing1", "testing1");
+		Connection dbCon=(new database.DatabseConnection()).dbConnection(hostname, dbName, loginUser, loginPasswd, port);
 		try {
 			PreparedStatement stmt=dbCon.prepareStatement(sel_quest);
 			stmt.setInt(1, assignment_id);

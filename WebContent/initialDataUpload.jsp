@@ -7,7 +7,8 @@
 	pageEncoding="UTF-8"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
+<head> 
+ <link rel="stylesheet" href="css/structure.css" type="text/css"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <script type="text/javascript" src="scripts/wufoo.js"></script>
 <link rel="stylesheet" href="css/structure.css" type="text/css" />
@@ -18,22 +19,7 @@
 <title>Upload Sample Data</title>
 <style>
 /*Defaults Styling*/
-body {
-	font: 12px/17px Arial, Helvetica, sans-serif;
-	color: #333;
-	background: #ccc;
-	padding: 40px 20px 100% 20px;
-	margin: 0;
-}
 
-fieldset {
-	background: #f2f2e6;
-	padding: 10px;
-	border: 1px solid #fff;
-	border-color: #fff #666661 #666661 #fff;
-	margin-bottom: 36px;
-	
-}
 
 textarea,select {
 	font: 12px/12px Arial, Helvetica, sans-serif;
@@ -51,17 +37,6 @@ fieldset.action {
 	margin-top: -20px;
 }
 
-legend {
-	text-align: left;
-	background: #bfbf30;
-	color: #fff;
-	font: 17px/21px Calibri, Arial, Helvetica, sans-serif;
-	padding: 0 10px;
-	margin: -26px 0 0 -11px;
-	font-weight: bold;
-	border: 1px solid #fff;
-	border-color: #e5e5c3 #505014 #505014 #e5e5c3;
-}
 
 label {
 	font-size: 15px;
@@ -171,10 +146,10 @@ label span,.required {
 						String passwd2 = dbp.getPasswd2();
 						String hostname = dbp.getHostname();
 						String dbName = dbp.getDbName();
+						String port = dbp.getPortNumber();
 
 						//get the connection for testing1
-						Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-								dbName, username, passwd);
+						Connection dbcon = (new DatabseConnection()).dbConnection(hostname, dbName, username, passwd, port);
 
 						try {
 

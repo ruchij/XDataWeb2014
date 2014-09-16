@@ -1,3 +1,4 @@
+<%@page import="database.CommonFunctions"%>
 <%@page import="testDataGen.TestAssignment"%>
 <%@page import="testDataGen.TestAssignment.QueryStatus" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -11,22 +12,13 @@
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
+<head> 
+ <link rel="stylesheet" href="../css/structure.css" type="text/css"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Update a single query</title>
 
 <style>
-html,body {
-	margin: 0;
-	background: #ccc;
-}
 
-body {
-	font: 12px/17px Arial, Helvetica, sans-serif;
-	color: #333;
-	background: #ccc;
-	padding: 0px 0px 0px 0px;
-}
 </style>
 
 </head>
@@ -34,6 +26,7 @@ body {
 
 
 	<%
+		Boolean interactiveMode = true;
 		String queryID = (String) request.getParameter("questionId");
 		String asID = (String) request.getParameter("assignmentId");
 		String courseID = (String) request.getSession().getAttribute(
@@ -48,14 +41,18 @@ body {
 		String username = dbp.getUsername1(); //change user name according to your db user -testing1
 		String username2 = dbp.getUsername2();//This is for testing2
 		String passwd = dbp.getPasswd1(); //change user passwd according to your db user passwd
-		String passwd2 = dbp.getPasswd1();
+		String passwd2 = dbp.getPasswd2();
 		String hostname = dbp.getHostname();
 		String dbName = dbp.getDbName();
-
+		String port = dbp.getPortNumber();
+		
 		Connection dbcon = null;
 
 		dbcon = (new DatabseConnection()).dbConnection(hostname, dbName,
-				username, passwd);
+				username, passwd, port);
+		
+		Connection testConn = (new DatabseConnection()).dbConnection(hostname, dbName,
+				username2, passwd2, port);
 		
 		PreparedStatement stmt;
 		ResultSet rs = null;
@@ -138,17 +135,28 @@ body {
 					}
 					
 					stmt.executeUpdate();
-					rs.close();
+					//rs.close();
+					//dbcon.close();
 					
 					TestAssignment ta = new TestAssignment();
 					String args[] = {String.valueOf(asID), String.valueOf(queryID.trim()), studentID};
 					
-					TestAssignment.QueryStatus status = ta.testQuery(args);
+					TestAssignment.QueryStatus status = ta.evaluateQuestion(dbcon, testConn, args);
 					
 					System.out.println("TestQueryOuput" + status.toString());
+					String remoteLink = "";
+					if(interactiveMode){
+						session.setAttribute("dbConn", dbcon);
+						session.setAttribute("testConn", testConn);
+						session.setAttribute("displayTestCase", true);
+						remoteLink = "/xdata/demo/StudentTestCase?user_id=" + studentID +"&assignment_id=" + asID 
+								+ "&question_id=" + queryID +"&query=" + CommonFunctions.encodeURIComponent(correctquery) + "&status=" + status.toString();
+					}
+					else{
+						remoteLink = "ListOfQuestions.jsp?AssignmentID=" + asID + "&&studentId=" + studentID
+											+ "&&status=" + status.toString();						
+					}
 					
-					String remoteLink = "ListOfQuestions.jsp?AssignmentID=" + asID + "&&studentId=" + studentID
-											+ "&&status=" + status.toString();
 					response.sendRedirect(remoteLink);
 		
 				}
@@ -162,7 +170,7 @@ body {
 				}				
 		}
 		
-		dbcon.close();
+		
 		
 	%>
 </body>

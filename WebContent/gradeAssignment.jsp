@@ -7,36 +7,17 @@
 <%@page import="database.*"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
+<head> 
+ <link rel="stylesheet" href="css/structure.css" type="text/css"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Grade Assignment</title>
 <style>
-html,body {
-	margin: 0;
-	width: 100%;
-	height: 100%;
-}
 
 li {
 	text-align: left
 }
 
-body {
-	font: 12px/17px Arial, Helvetica, sans-serif;
-	color: #333;
-	background: #ccc;
-	padding: 0px 0px 0px 0px;
-}
 
-fieldset {
-	background: #f2f2e6;
-	padding: 10px;
-	border: 1px solid #fff;
-	border-color: #fff #666661 #666661 #fff;
-	margin-bottom: 36px;
-	/* 	width: 90%;
-	height: 100%; */
-}
 
 textarea,select {
 	font: 12px/12px Arial, Helvetica, sans-serif;
@@ -54,17 +35,6 @@ fieldset.action {
 	margin-top: -20px;
 }
 
-legend {
-	background: #bfbf30;
-	color: #fff;
-	font: 17px/21px Calibri, Arial, Helvetica, sans-serif;
-	padding: 0 10px;
-	margin: -26px 0 0 -11px;
-	font-weight: bold;
-	border: 1px solid #fff;
-	border-color: #e5e5c3 #505014 #505014 #e5e5c3;
-	text-align: left;
-}
 
 label {
 	font-size: 15px;
@@ -87,18 +57,10 @@ a:link {
 	color: #E96D63;
 	font: 15px/15px Arial, Helvetica, sans-serif;
 } /* unvisited link */
-a:visited {
-	color: #E96D63;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* visited link */
 a:hover {
 	color: #7FCA9F;
 	font: 15px/15px Arial, Helvetica, sans-serif;
 } /* mouse over link */
-a:active {
-	color: #85C1F5;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* selected link */
 .stop-scrolling {
 	height: 100%;
 	overflow: hidden;
@@ -126,9 +88,10 @@ a:active {
 				String passwd2 = dbp.getPasswd2();
 				String hostname = dbp.getHostname();
 				String dbName = dbp.getDbName();
+				String port = dbp.getPortNumber();
+				
 				//get connection
-				Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-						dbName, username, passwd);
+				Connection dbcon = (new DatabseConnection()).dbConnection(hostname, dbName, username, passwd, port);
 				Timestamp start = null;
 				Timestamp end = null;
 

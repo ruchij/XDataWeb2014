@@ -8,42 +8,19 @@
 <%@page import="database.DatabaseProperties"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
+<head> 
+ <link rel="stylesheet" href="../css/structure.css" type="text/css"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Insert title here</title>
 
 <style>
-html,body {
-	margin: 0;
-	background: #ccc;
-}
 
 label {
 	font-size: 18px;
 	font-weight: bold;
 	color: #666;
 }
-legend {
-	background: #bfbf30;
-	color: #fff;
-	font: 17px/21px Calibri, Arial, Helvetica, sans-serif;
-	padding: 0 10px;
-	margin: -26px 0 0 -11px;
-	font-weight: bold;
-	border: 1px solid #fff;
-	border-color: #e5e5c3 #505014 #505014 #e5e5c3;
-	text-align: left;
-}
 
-fieldset {
-	background: #f2f2e6;
-	padding: 10px;
-	border: 1px solid #fff;
-	border-color: #fff #666661 #666661 #fff;
-	margin-bottom: 36px;
-	/* 	width: 90%;
-	height: 100%; */
-}
 
 </style>
 
@@ -72,10 +49,11 @@ fieldset {
 					String passwd2 = dbp.getPasswd2();
 					String hostname = dbp.getHostname();
 					String dbName = dbp.getDbName();
+					String port = dbp.getPortNumber();
 
 					//get connection
 					Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-							dbName, username, passwd);
+							dbName, username, passwd, port);
 
 					try {
 						PreparedStatement stmt;

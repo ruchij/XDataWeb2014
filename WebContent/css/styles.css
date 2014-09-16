@@ -176,5 +176,10 @@ input[type=submit]:active {
 	background-image: linear-gradient(top left 90deg, #6ec2e8 0%, #b6e2ff 100%);
 }
 
+#loginMessage{
+	font-size:12px;
+	color:red;
+}
+
 
 

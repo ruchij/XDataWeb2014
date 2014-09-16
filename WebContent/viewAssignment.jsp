@@ -8,7 +8,8 @@
 <%@page import="database.DatabaseProperties"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
+<head> 
+ <link rel="stylesheet" href="css/structure.css" type="text/css"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Assignment List</title>
 <script type="text/javascript" src="scripts/newrow.js"></script>
@@ -43,9 +44,11 @@
 	String passwd2 = dbp.getPasswd2();
 	String hostname = dbp.getHostname();
 	String dbName = dbp.getDbName();
+	String port = dbp.getPortNumber();
+	
 	//get connection
 	Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-			dbName, username, passwd);
+			dbName, username, passwd, port);
 	//FIXME Handle getting date and time from assignment table
 	//get assignment details
 	//java.sql.Date start;
@@ -162,7 +165,8 @@
 	 	out.println( "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> ");
 
 	 	out.println(" <html xmlns=\"http://www.w3.org/1999/xhtml\"> ");
-	out.println("<head>");
+	out.println("<head> 
+ <link rel="stylesheet" href="css/structure.css" type="text/css"/>");
 	out.println("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />");
 	
 	
