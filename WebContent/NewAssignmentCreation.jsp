@@ -1,7 +1,7 @@
 <%@ page import="java.io.*"%>
 <%@ page import="java.util.*"%>
 <%@page import="java.sql.*"%>
-<%@page import="database.DatabseConnection"%>
+<%@page import="database.DatabaseConnection"%>
 <%@page import="database.DatabaseProperties"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
@@ -26,107 +26,35 @@
 
 <!-- CSS -->
 <link rel="stylesheet" href="css/structure.css" type="text/css" />
-<link rel="stylesheet" href="css/form.css" type="text/css" />
-<link rel="stylesheet" href="css/theme.css" type="text/css" />
-
 <link rel="canonical"
 	href="http://www.wufoo.com/gallery/designs/template.html">
-
-
 <style>
 
-/*Defaults Styling*/
 
-
-
-
-select {
-	font: 12px/12px Arial, Helvetica, sans-serif;
-	padding: 0;
-	display: inline-block;
-	float: left;
-	text-align: left;
-	margin-bottom: 11px;
+.fieldset fieldset{
+	padding-left: 30px;
+	padding-top:30px;
 }
 
-input {
-	font: 15px/15px Arial, Helvetica, sans-serif;
-	padding: 0;
-	display: inline-block;
-	float: left;
-	clear: both;
-	text-align: left;
-	margin-bottom: 11px;
+.fieldset div label{
+	float:left;
+	width: 250px;
 }
 
-fieldset.action {
-	background: #9da2a6;
-	border-color: #e5e5e5 #797c80 #797c80 #e5e5e5;
-	margin-top: -20px;
+.fieldset div{
+	margin-bottom: 20px;
+	height:20px;
+	width:100%;
 }
 
-
-label {
-	font: 18px/18px Arial, Helvetica, sans-serif;
-	font-weight: bold;
-	color: #666;
-	display: inline-block;
-	float: left;
-	clear: both;
-	text-align: left;
-	margin-bottom: 11px;
+.fieldset div input{
+	width: 400px;
+	height: 20px;
+	float:left;
 }
 
-label.opt {
-	font-weight: normal;
-}
-
-dl {
-	clear: both;
-}
-
-dt {
-	float: left;
-	text-align: right;
-	width: 90px;
-	line-height: 25px;
-	margin: 0 10px 10px 0;
-}
-
-dd {
-	float: left;
-	width: 475px;
-	line-height: 25px;
-	margin: 0 0 10px 0;
-}
-
-#footer {
-	font-size: 11px;
-}
-
-#container {
-	background: #ccc;
-	width: 80%;
-	margin: 0 auto;
-	border: none;
-}
-
-label span,.required {
-	color: red;
-	font-weight: bold;
-	font-size: 17px;
-	margin-bottom: 11px;
-}
-
-.required {
-	text-align: left;
-}
-
-.assgnmentForm {
-	margin: 0 auto;
-	align: center;
-}
 </style>
+
 
 <script type="text/javascript">
 	function defaultDate() {
@@ -211,98 +139,82 @@ label span,.required {
 	<div>
 		<form class="assgnmentForm" name="assignmentForm"
 			action="updateAssignment.jsp" method="post" style="border: none">
-			<p class="required">* Required</p>
-
 			<div class="fieldset">
 				<fieldset>
 					<legend> Create a new assignment</legend>
-
-
-					<label><span>*</span><strong>Assignment Name/Id</strong></label>
-
-
-					<textarea style="width: 50%; height: 10%;"
-						placeholder="Give name of this assignment" name="description"
-						required></textarea>
-
-					<label><span>*</span><strong>Assignment
-							Description</strong></label>
-
-
-					<textarea style="width: 60%; height: 50px;"
-						placeholder="Give description of this assignment"
-						name="description" required></textarea>
-
-
-
-
+					
+					<div>	
+						<label>Assignment Name/Id</label>
+						<input placeholder="Give name of this assignment" name="description"
+							required/> <input style="width:30px" type="checkbox" name="interactive"/>
+							<label style="margin-top:5px;">Interactive</label>
+					</div>
+					
+					<div>
+					<label>Assignment Description</label>
+					<input placeholder="Give description of this assignment" name="description" required/>
+					</div>
 					<%
-						String courseId = (String) request.getSession().getAttribute(
-								"context_label");
-						//get database properties
-						DatabaseProperties dbp = new DatabaseProperties();
-						String username = dbp.getUsername1();
-						String username2 = dbp.getUsername2();
-						String passwd = dbp.getPasswd1();
-						String passwd2 = dbp.getPasswd2();
-						String hostname = dbp.getHostname();
-						String dbName = dbp.getDbName();
-						String port = dbp.getPortNumber();
+						if (session.getAttribute("LOGIN_USER") == null || !session.getAttribute("LOGIN_USER").equals("ADMIN")) {
+										response.sendRedirect("index.html");
+										return;
+									}
+									
+									String courseId = (String) request.getSession().getAttribute(
+											"context_label");
 
-						//get the connection for testing1
-						Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-								dbName, username, passwd, port);
+									//get the connection for testing1
+									Connection dbcon = (new DatabaseConnection()).graderConnection();
 
-						try {
+									try {
 
-							PreparedStatement stmt;
-							stmt = dbcon
-									.prepareStatement("SELECT connection_id,connection_name FROM database_connection WHERE course_id = ?");
-							stmt.setString(1, courseId);
+										PreparedStatement stmt;
+										stmt = dbcon
+												.prepareStatement("SELECT connection_id,connection_name FROM database_connection WHERE course_id = ?");
+										stmt.setString(1, courseId);
 
-							String output = "";
-							ResultSet rs = stmt.executeQuery();
-							while (rs.next()) {
-								output += " <option value = \""
-										+ rs.getInt("connection_id") + "\"> "
-										+ rs.getInt("connection_id") + "-"
-										+ rs.getString("connection_name") + " </option> ";
-							}
-							
-							rs.close();
+										String output = "";
+										ResultSet rs = stmt.executeQuery();
+										while (rs.next()) {
+											output += " <option value = \""
+													+ rs.getInt("connection_id") + "\"> "
+													+ rs.getInt("connection_id") + "-"
+													+ rs.getString("connection_name") + " </option> ";
+										}
+										
+										rs.close();
 
-							out.println("<label><span>*</span><strong>Database Connection</strong></label>  <select name=\"dbConnection\" style=\"clear:both;\"> "
-									+ output + "</select> ");
-							
-							output = "";
-							
-							stmt = dbcon
-									.prepareStatement("SELECT schema_id,schema_name FROM schemainfo WHERE course_id = ?");
-							stmt.setString(1, courseId);
-							/* rs = stmt.executeQuery();
-							
-							while (rs.next()) {
-								output += " <option value = \"" + rs.getInt("schema_id")
-										+ "\"> " + rs.getInt("schema_id") + "-"
-										+ rs.getString("schema_name") + " </option> ";
-							}  */
-							output +=" <option value = \"1\" required> 1-Test Schema</option> ";
-							out.println("<label><span>*</span><strong>Database Schema</strong></label>  <select name=\"schemaid\" style=\"clear:both;\"> "
-									+ output + "</select> ");
-							
-							
-						} catch (Exception err) {
+										out.println("<div><label>Database Connection</label>  <select name=\"dbConnection\" style=\"clear:both;\"> "
+												+ output + "</select></div>");
+										
+										output = "";
+										
+										stmt = dbcon
+												.prepareStatement("SELECT schema_id,schema_name FROM schemainfo WHERE course_id = ?");
+										stmt.setString(1, courseId);
+										/* rs = stmt.executeQuery();
+										
+										while (rs.next()) {
+											output += " <option value = \"" + rs.getInt("schema_id")
+													+ "\"> " + rs.getInt("schema_id") + "-"
+													+ rs.getString("schema_name") + " </option> ";
+										}  */
+										output +="<option value = \"1\" required> 1-Test Schema</option> ";
+										out.println("<div><label>Database Schema</label>  <select name=\"schemaid\" style=\"clear:both;\"> "
+												+ output + "</select></div>");
+										
+										
+									} catch (Exception err) {
 
-							err.printStackTrace();
-							out.println("ERROR OCCURRED");
-						}
-						finally{
-							dbcon.close();
-						}
+										err.printStackTrace();
+										out.println("ERROR OCCURRED");
+									}
+									finally{
+										dbcon.close();
+									}
 					%>
-					<p>
-						<label class="field"><span>*</span>Starts at: </label>
-					</p>
+					<div>
+						<label class="field">Starts at: </label>
 					<select style="clear: both;" name="startday" id="startday" required>
 						<option value="01">1</option>
 						<option value="02">2</option>
@@ -335,7 +247,8 @@ label span,.required {
 						<option value="29">29</option>
 						<option value="30">30</option>
 						<option value="31">31</option>
-					</select> &nbsp <select name="startmonth" id="startmonth" required>
+					</select>
+					<select name="startmonth" id="startmonth" required>
 						<option value="01">January</option>
 						<option value="02">February</option>
 						<option value="03">March</option>
@@ -348,7 +261,8 @@ label span,.required {
 						<option value="10">October</option>
 						<option value="11">November</option>
 						<option value="12">December</option>
-					</select> &nbsp <select name="startyear" id="startyear" required>
+					</select>
+					<select name="startyear" id="startyear" required>
 						<option value="2012">2012</option>
 						<option value="2013">2013</option>
 						<option value="2014">2014</option>
@@ -358,9 +272,7 @@ label span,.required {
 						<option value="2018">2018</option>
 						<option value="2019">2019</option>
 						<option value="2020">2020</option>
-					</select> &nbsp
-					<!-- <label><strong>Start Time</strong></label> <br />  -->
-					<!-- <input type="datetime"  name="starttime" placeholder="HH:MM:SS(24hr)"><br/> -->
+					</select>
 					<select name="starthour" id="starthour" required>
 
 						<option value="01">01</option>
@@ -377,20 +289,23 @@ label span,.required {
 						<option value="12">12</option>
 
 
-					</select> &nbsp <select name="startmin" id="startmin" required>
+					</select>
+					<select name="startmin" id="startmin" required>
 						<option value="00">00</option>
 						<option value="10">10</option>
 						<option value="20">20</option>
 						<option value="30">30</option>
 						<option value="40">40</option>
 						<option value="50">50</option>
-					</select> &nbsp <select name="startampm" id="startampm" required>
+					</select> 
+					<select name="startampm" id="startampm" required>
 						<option value="00">AM</option>
 						<option value="12">PM</option>
-					</select> <label class="field"><span>*</span><strong>Ends
-							at </strong></label>
-					<!--  <input type="datetime"  name="enddate" placeholder="DD-MM-YYYY"><br/> -->
-
+					</select> 
+					</div>
+					
+					<div>
+					<label class="field">Ends at </label>
 					<select style="clear: both;" name="endday" id="endday" required>
 						<option value="01">1</option>
 						<option value="02">2</option>
@@ -423,7 +338,8 @@ label span,.required {
 						<option value="29">29</option>
 						<option value="30">30</option>
 						<option value="31">31</option>
-					</select> &nbsp <select name="endmonth" id="endmonth" required>
+					</select>
+					<select name="endmonth" id="endmonth" required>
 						<option value="01">January</option>
 						<option value="02">February</option>
 						<option value="03">March</option>
@@ -436,7 +352,8 @@ label span,.required {
 						<option value="10">October</option>
 						<option value="11">November</option>
 						<option value="12">December</option>
-					</select> &nbsp <select name="endyear" id="endyear" required>
+					</select>
+					<select name="endyear" id="endyear" required>
 						<option value="2012">2012</option>
 						<option value="2013">2013</option>
 						<option value="2014">2014</option>
@@ -446,9 +363,8 @@ label span,.required {
 						<option value="2018">2018</option>
 						<option value="2019">2019</option>
 						<option value="2020">2020</option>
-					</select> &nbsp
-					<!-- <label><strong>End Time</strong></label> <br /> -->
-					<!--  <input type="datetime"  name="endtime" placeholder="HH:MM:SS(24hr)"><br/> -->
+					</select>
+					
 					<select name="endhour" id="endhour" required>
 
 						<option value="01">01</option>
@@ -464,20 +380,24 @@ label span,.required {
 						<option value="11">11</option>
 						<option value="12">12</option>
 
-					</select> &nbsp <select name="endmin" id="endmin" required>
+					</select>
+					<select name="endmin" id="endmin" required>
 						<option value="00">00</option>
 						<option value="10">10</option>
 						<option value="20">20</option>
 						<option value="30">30</option>
 						<option value="40">40</option>
 						<option value="50">50</option>
-
-					</select> &nbsp <select name="endampm" id="endampm" required>
+					</select>
+					
+					<select name="endampm" id="endampm" required>
 						<option value="00">AM</option>
 						<option value="12">PM</option>
-						<br />
-						<br />
-						<input type="submit" value="Submit">
+					</select>
+					</div>
+					
+					<input type="submit" value="Submit">
+				</fieldset>
 			</div>
 		</form>
 

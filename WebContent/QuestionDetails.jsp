@@ -6,84 +6,52 @@
 <%@page import="java.sql.*"%>
 <%@ page import="java.text.*"%>
 <%@page import="database.*"%>
+<%
+	String qID = (String) request.getParameter("questionId");
 
+	String correctQueryID = "1";
+%>
 <html>
 <head> 
  <link rel="stylesheet" href="css/structure.css" type="text/css"/>
+ <link rel="stylesheet" href="scripts/codemirror/lib/codemirror.css" />
+
+<link rel="stylesheet" href="scripts/codemirror/addon/hint/show-hint.css" />
+<script src="scripts/codemirror/addon/hint/show-hint.js"></script>
+<script src="scripts/codemirror/addon/hint/sql-hint.js"></script>
+
+<script src="scripts/codemirror/lib/codemirror.js"></script>
+<script src="scripts/codemirror/mode/sql/sql.js"></script>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Details of the Question</title>
 
-<style>
-
-
-
-textarea,select {
-	font: 12px/12px Arial, Helvetica, sans-serif;
-	padding: 0;
-}
-
-input {
-	font: 15px/15px Arial, Helvetica, sans-serif;
-	padding: 0;
-}
-
-fieldset.action {
-	background: #9da2a6;
-	border-color: #e5e5e5 #797c80 #797c80 #e5e5e5;
-	margin-top: -20px;
-}
-
-
-label {
-	font-size: 15px;
-	font-weight: bold;
-	color: #666;
-}
-
-label span,.required {
-	color: red;
-	font-weight: bold;
-	font-size: 17px;
-}
-
-a:link {
-	color: #E96D63;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* unvisited link */
-a:hover {
-	color: #7FCA9F;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* mouse over link */
-.stop-scrolling {
-	height: 100%;
-	overflow: hidden;
-}
-</style>
 
 <script type="text/javascript" src="scripts/ManageQuery.js"></script>
-<!-- <script>
-	function report(btn, selected) {
-
-		var qid = btn.name.split(" ")[1];
-		var asID = btn.name.split(" ")[2];
-		var quer = "query".concat(qid);
-		var que = document.getElementById(quer).value;
-		var desc = document.getElementById("quesTxt".concat(qid)).value;
-		if (selected == "1") {
-			var out = "UpdateSingleQuery.jsp?assignment_id=" + asID
-					+ "&question_id=" + qid + "&query=" + que + "&desc=" + desc;
-			window.location.href = out;
-		} else if (selected == "2") {
-			var out = "AssignmentChecker?assignment_id=" + asID
-					+ "&question_id=" + qid + "&query=" + que;
-			window.open(out, "Generating Dataset", "height=400,width=400 ");
-		} else if (selected == 3) {
-			var out = "ListOfQuestions.jsp?AssignmentID=" + asID;
-			window.location.href = out;
-		}
-
-	}
-</script> -->
+ <script>
+ window.onload = function() {
+	  var mime = 'text/x-mariadb';
+	  // get mime type
+	  if (window.location.href.indexOf('mime=') > -1) {
+	    mime = window.location.href.substr(window.location.href.indexOf('mime=') + 5);
+	  }
+	  window.editor = CodeMirror.fromTextArea(document.getElementById('query <%= qID +" " + correctQueryID %>'), {
+	    mode: mime,
+	    indentWithTabs: true,
+	    smartIndent: true,
+	    lineNumbers: true,
+	    matchBrackets : false,
+	    lineWrapping: true,
+	    autofocus: true,
+	    extraKeys: {"Ctrl-Space": "autocomplete"},
+	    hintOptions: {tables: {
+	      users: {name: null, score: null, birthDate: null},
+	      countries: {name: null, population: null, size: null}
+	    }}
+	  });
+	  CodeMirror.commands.autocomplete = function(cm) {
+	  }
+	};
+</script>
 </head>
 <body>
 
@@ -93,6 +61,11 @@ a:hover {
 			<fieldset>
 				<legend> Assignment Details and Instructions</legend>
 				<%
+					if (session.getAttribute("LOGIN_USER") == null || !session.getAttribute("LOGIN_USER").equals("ADMIN")) {
+						response.sendRedirect("index.html");
+						return;
+					}
+				
 					String assignID = (String) request.getParameter("AssignmentID");
 					String courseID = (String) request.getSession().getAttribute(
 							"context_label");
@@ -102,61 +75,66 @@ a:hover {
 					out.println(instructions);
 				%>
 			</fieldset>
+			
+			<br/>
+			
 			<fieldset>
 				<legend> Question Details</legend>
 
 				<%
-					
 					String questionID = (String) request.getParameter("questionId");
-					
-					//get database properties
-					DatabaseProperties dbp = new DatabaseProperties();
-					String username = dbp.getUsername1(); //change user name according to your db user -testing1
-					String username2 = dbp.getUsername2();//This is for testing2
-					String passwd = dbp.getPasswd1(); //change user passwd according to your db user passwd
-					String passwd2 = dbp.getPasswd2();
-					String hostname = dbp.getHostname();
-					String dbName = dbp.getDbName();
-					String port = dbp.getPortNumber();
+							
+							//get connection
+							Connection dbcon = (new DatabaseConnection()).graderConnection();
 
-					//get connection
-					Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-							dbName, username, passwd, port);
+							String output = "";
 
-					String output = "";
+							String listButton = "<input type=\"button\" name=\"button "
+									+ questionID
+									+ " "
+									+ assignID
+									+ "\" "
+									+ " onClick=\"report(this,3)\""
+									+ " value=\"List Of Questions\" style=\"float:right;\"><br/>\n";
 
-					String listButton = "<input type=\"button\" name=\"button "
-							+ questionID
-							+ " "
-							+ assignID
-							+ "\" "
-							+ " onClick=\"report(this,3)\""
-							+ " value=\"List Of Questions\" style=\"float:right;\"><br/>\n";
+							output += listButton
+									+ "<table  cellspacing=\"10\"  class=\"authors-list\" id=\"queryTable\" align=\"center\"> \n <tr> <th >Question ID</th>       <th >Question Text</th>  <th >Correct Query</th> <th> </th></tr>"
+									+ "\n";
+							//get query details
+							try {
+								PreparedStatement stmt;
+								//stmt = dbcon.prepareStatement("SELECT * FROM  qinfo ,assignment where qinfo.assignment_id=? AND qinfo.assignment_id=assignment.assignment_id");
+								stmt = dbcon
+										.prepareStatement("SELECT * FROM  qinfo  where assignmentid=? and courseid=? and questionid=?");
+								stmt.setString(1, assignID.trim());
+								stmt.setString(2, courseID.trim());
+								stmt.setString(3, (String) request.getParameter("questionId"));
+								System.out.println("QId :" + (String) request.getParameter("questionId"));
+								System.out.println("Course Id: " + courseID);
+								System.out.println("AssId :" + assignID);
 
-					output += listButton
-							+ "<table  cellspacing=\"10\"  class=\"authors-list\" id=\"queryTable\" align=\"center\"> \n <tr> <th >Question ID</th>       <th >Question Text</th>  <th >Correct Query</th> <th> </th></tr>"
-							+ "\n";
-					//get query details
-					try {
-						PreparedStatement stmt;
-						//stmt = dbcon.prepareStatement("SELECT * FROM  qinfo ,assignment where qinfo.assignment_id=? AND qinfo.assignment_id=assignment.assignment_id");
-						stmt = dbcon
-								.prepareStatement("SELECT * FROM  qinfo  where assignmentid=? and courseid=? and questionid=?");
-						stmt.setString(1, assignID.trim());
-						stmt.setString(2, courseID.trim());
-						stmt.setString(3, (String) request.getParameter("questionId"));
-						System.out.println("QId :" + (String) request.getParameter("questionId"));
-						System.out.println("Course Id: " + courseID);
-						System.out.println("AssId :" + assignID);
-
-						ResultSet rs = stmt.executeQuery();
-						String qID = (String) request.getParameter("questionId");
-						
-						String correctQueryID = "1";
-						
-						while (rs.next()) {
-							String query = rs.getString("correctquery");
-							String description = rs.getString("querytext");
+								ResultSet rs = stmt.executeQuery();
+								
+								
+								while (rs.next()) {
+									String query = rs.getString("correctquery");
+									String description = rs.getString("querytext");
+				%>
+							<div class="questionelement">
+								<div class="question"><span>Q<%= qID %>. </span><%= description %></div>
+								<div>
+									<div class="description" style='padding:10px 5px 5px 5px;float:left; width:35%;'>
+										<textarea style="padding:5px;width:95%; height:290px;" name ='quesTxt' id = 'quesTxt<%= qID%>'><%= description %></textarea>
+									</div>
+									<div class="answer">
+										<textarea name='query' id='query <%=qID +" " + correctQueryID %>'><%=query %></textarea>
+									</div>
+								</div>
+								<div class="editbutton">
+								<input type="button" onClick="report(this,1)"  value="Update Query" name="button <%=qID + " "+assignID%>"/>
+								</div>
+							</div>
+							<%
 							output += "<tr class=\" "+qID+"\"> \n <td> <p align=\"center\" name=\"qID\" id=\"qID"
 									+ qID + "\" >" + qID + "</p> </td> \n";
 							output += "<td> <textarea name=\"quesTxt\"  id=\"quesTxt"
@@ -166,52 +144,15 @@ a:hover {
 									+ "\"rows=\"6\" cols=\"35\">" + query
 									+ " </textarea></td> \n";
 
-							/* 	output = output
-										.concat("<td> <input type=\"button\" id=\"button "
-												+ qID +" "+assignID
-												+ "\" value=\"Generate Dataset\" onclick=\"submitter(this,'queryTable')\"> </td></tr>"
-												+ "\n");
-							 */
-
-							/* 	output += "<td>  <select onChange=\"window.location.href=this.value\" name=\"button\" id=\"button "+ qID +" "+assignID+ "\"required>" + 
-									"<option value=\"Select\"> Select Option</option>"+
-									"<option value=\"QuestionDetails.jsp?AssignmentID="+assignID + 
-									"&&courseId="+ courseID+ "&&questionId="+ qID+ " \">Update Query</option>" +
-									"<option value=\"submitter(this,'queryTable')\">Generate Dataset</option> "+
-									"<td> "; */
-
-							String update = "UpdateSingleQuery.jsp?assignment_id="
-									+ assignID + "&&question_id=" + qID
-									+ "'\"target = \"rightPageBottom\"";
-
-							String generate = "AssignmentChecker?assignment_id="
-									+ assignID + "&&question_id=" + qID + "&&query="
-									+ query + "'\"target = \"rightPageBottom\"";
-
 							String id = "<input type=\"button\" name=\"button " + qID
 									+ " " + assignID + "\" ";
-
-							String options = "<a href=\"" + update
-									+ "\"> Update Query<a><br/>\n" + "<a href=\""
-									+ generate + "\"> Generate Dataset<a><br/>\n";
-
+							
 							String buttons = id + " onClick=\"report(this,1)\""
 									+ " value=\"Update Query\" ><br/>\n" + id
 									+ "<onClick=\"report(this,1)\""
 									+ " value=\"Generate Dataset\" >";
 
 							output += "<td>" + buttons + "</td>\n</tr>\n";
-							/* 	output += "<td>  <select onClick=\"report(this)\" name=\"button\" id=\"button "
-										+ qID
-										+ " "
-										+ assignID
-										+ "\"required>"
-										+ "<option value=\"0\"> Select Option</option>"
-										+ "<option value=\"1\"> Update Query</option>"
-										+ "<option value=\"2\"> Generate DataSet</option>"
-										+ "<option value=\"3\"> List Question</option>"
-										+ "</td>"; */
-
 						}
 						
 						rs.close();
@@ -224,7 +165,8 @@ a:hover {
 					finally{
 						dbcon.close();
 					}
-					output += "</table>";
+					//output += "</table>";
+					output = "";
 					out.println(output);
 				%>
 			</fieldset>

@@ -4,7 +4,7 @@
 <%@ page import="java.util.*"%>
 <%@page import="java.sql.*"%>
 <%@ page import="java.text.*"%>
-<%@page import="database.DatabseConnection"%>
+<%@page import="database.DatabaseConnection"%>
 <%@page import="database.DatabaseProperties"%>
 <%@page import="database.CommonFunctions"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -17,49 +17,28 @@
 <style>
 
 
-
-
-input {
-	font: 15px/15px Arial, Helvetica, sans-serif;
-	padding: 0;
+.fieldset fieldset{
+	padding-left: 30px;
+	padding-top:30px;
 }
 
-fieldset.action {
-	background: #9da2a6;
-	border-color: #e5e5e5 #797c80 #797c80 #e5e5e5;
-	margin-top: -20px;
+.fieldset div label{
+	float:left;
+	width: 250px;
 }
 
-
-label {
-	font-size: 15px;
-	font-weight: bold;
-	color: #666;
+.fieldset div{
+	margin-bottom: 20px;
+	height:20px;
+	width:100%;
 }
 
-label span,.required {
-	color: red;
-	font-weight: bold;
-	font-size: 17px;
+.fieldset div input{
+	width: 400px;
+	height: 20px;
+	float:left;
 }
 
-a:link {
-	color: #E96D63;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* unvisited link */
-a:hover {
-	color: #7FCA9F;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* mouse over link */
-.stop-scrolling {
-	height: 100%;
-	overflow: hidden;
-}
-
-.assgnmentForm {
-	margin: 0 auto;
-	align: center;
-}
 </style>
 <script type="text/javascript" src="scripts/ManageQuery.js"></script>
 </head>
@@ -69,23 +48,17 @@ a:hover {
 		<br /> <br />
 
 		<%
+			if (session.getAttribute("LOGIN_USER") == null || !session.getAttribute("LOGIN_USER").equals("ADMIN")) {
+				response.sendRedirect("index.html");
+				return;
+			}
+				
 			String assignID = (String) request.getParameter("AssignmentID");
 			String courseID = (String) request.getSession().getAttribute(
 					"context_label");
 
-			//get database properties
-			DatabaseProperties dbp = new DatabaseProperties();
-			String username = dbp.getUsername1(); //change user name according to your db user -testing1
-			String username2 = dbp.getUsername2();//This is for testing2
-			String passwd = dbp.getPasswd1(); //change user passwd according to your db user passwd
-			String passwd2 = dbp.getPasswd2();
-			String hostname = dbp.getHostname();
-			String dbName = dbp.getDbName();
-			String port = dbp.getPortNumber();
-			
 			//get connection
-			Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-					dbName, username, passwd, port);
+			Connection dbcon = (new DatabaseConnection()).graderConnection();
 
 			/**store details of assignment*/
 			String asDescription = "", dbType = "", jdbcUrl = "", dbUser = "", dbPassword = "", schemaId = "";
@@ -121,13 +94,12 @@ a:hover {
 					+ "\" method=\"post\" onsubmit=\"return(validate());\" > \n"
 
 					+ "<div class=\"fieldset\">	<fieldset>	<legend> Editing Assignment Details</legend> \n"
-					+ "<label >Asssignment ID: <label style=\"color: blue;\">"
+					+ "<label  style='font-weight:bold;'>Asssignment ID: <label>"
 					+ assignID
 					+ "</label></label> <br/><br/>"
 
-					+ "<label ><strong>Assignment Description</strong></label> <br/>"
-					+ "<textarea  class=\"ta\" placeholder=\"Give description of this assignment, if any\" name=\"description\">"
-					+ asDescription + " </textarea> <br/><br/>";
+					+ "<div><label >Assignment Description</label>"
+					+ "<input placeholder='Give description of this assignment, if any' value = '"+asDescription + "' name='description'/></div>";
 
 			PreparedStatement stmt = dbcon
 					.prepareStatement("SELECT connection_id,connection_name FROM database_connection WHERE course_id = ?");
@@ -143,7 +115,7 @@ a:hover {
 			
 			rs.close();
 
-			outp += "<label><span>*</span><strong>Database Connection</strong></label>  <select name=\"dbConnection\" style=\"clear:both;\"> "
+			outp += "<label>Database Connection</label>  <select name=\"dbConnection\" style=\"clear:both;\"> "
 					+ out + "</select> ";
 			//output += outp;
 			outp = "";
@@ -159,18 +131,18 @@ a:hover {
 						+ rs.getString("schema_name") + " </option> ";
 			}  */
 			outp += " <option value = \"1\" required> 1-Test Schema</option> ";
-			outp += "<label><span>*</span><strong>Database Schema</strong></label>  <select name=\"schemaid\" style=\"clear:both;\"> "
+			outp += "<label>Database Schema</label>  <select name=\"schemaid\" style=\"clear:both;\"> "
 					+ outp + "</select> ";
 			//output += outp;
 			
-			output += "<label ><span>*</span><strong>Assignment Opens at</strong></label><br />";
+			output += "<div><label >Assignment Opens at</label>";
 
 			database.CommonFunctions util = new database.CommonFunctions();
 			output += util.getTimeDetails(start, true);
-			output += "<label ><span>*</span><strong>Assignment Closes at</strong></label><br />";
+			output += "</div><div><label >Assignment Closes at</label>";
 
 			output += util.getTimeDetails(end, false);
-			output += "<input  type=\"submit\" id=\"sub\" value=\"Update\">   <br/>";
+			output += "</div><input  type=\"submit\" id=\"sub\" value=\"Update\">   <br/>";
 
 			out.println(output);
 			dbcon.close();

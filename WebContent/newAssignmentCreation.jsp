@@ -1,7 +1,7 @@
 <%@ page import="java.io.*"%>
 <%@ page import="java.util.*"%>
 <%@page import="java.sql.*"%>
-<%@page import="database.DatabseConnection"%>
+<%@page import="database.DatabaseConnection"%>
 <%@page import="database.DatabaseProperties" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
@@ -61,18 +61,8 @@ XData &middot; Assignment
 <br/>
 
 <%
-	//get database properties
-	DatabaseProperties dbp = new DatabaseProperties();
-	String username = dbp.getUsername1(); //change user name according to your db user -testing1
-	String username2 = dbp.getUsername2();//This is for testing2
-	String passwd = dbp.getPasswd1(); //change user passwd according to your db user passwd
-	String passwd2 = dbp.getPasswd2();
-	String hostname = dbp.getHostname();
-	String dbName = dbp.getDbName();
-	String port = dbp.getPortNumber();
-	
 	//get the connection for testing1
-    Connection dbcon=(new DatabseConnection()).dbConnection(hostname, dbName, username, passwd, port);
+    Connection dbcon=(new DatabaseConnection()).graderConnection();
 	
 	try{
 		

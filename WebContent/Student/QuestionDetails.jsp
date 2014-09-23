@@ -5,12 +5,20 @@
 <%@ page import="java.util.*"%>
 <%@page import="java.sql.*"%>
 <%@ page import="java.text.*"%>
-<%@page import="database.DatabseConnection"%>
+<%@page import="database.DatabaseConnection"%>
 <%@page import="database.DatabaseProperties"%>
 
 <html>
 <head> 
- <link rel="stylesheet" href="../css/structure.css" type="text/css"/>
+<link rel="stylesheet" href="../css/structure.css" type="text/css"/>
+<link rel="stylesheet" href="../scripts/codemirror/lib/codemirror.css" />
+
+<link rel="stylesheet" href="../scripts/codemirror/addon/hint/show-hint.css" />
+<script src="../scripts/codemirror/addon/hint/show-hint.js"></script>
+<script src="../scripts/codemirror/addon/hint/sql-hint.js"></script>
+
+<script src="../scripts/codemirror/lib/codemirror.js"></script>
+<script src="../scripts/codemirror/mode/sql/sql.js"></script>
 
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Details of the Question</title>
@@ -64,8 +72,35 @@ a:hover {
 
 <script type="text/javascript" src="scripts/ManageQuery.js"></script>
 <script>
+	window.onload = function() {
+	  var mime = 'text/x-mariadb';
+	  // get mime type
+	  if (window.location.href.indexOf('mime=') > -1) {
+	    mime = window.location.href.substr(window.location.href.indexOf('mime=') + 5);
+	  }
+	  window.editor = CodeMirror.fromTextArea(document.getElementById('query<%=(String) request.getParameter("questionId")%>'), {
+	    mode: mime,
+	    indentWithTabs: true,
+	    smartIndent: true,
+	    lineNumbers: true,
+	    matchBrackets : false,
+	    lineWrapping: true,
+	    autofocus: true,
+	    extraKeys: {"Ctrl-Space": "autocomplete"},
+	    hintOptions: {tables: {
+	      users: {name: null, score: null, birthDate: null},
+	      countries: {name: null, population: null, size: null}
+	    }}
+	  });
+	  CodeMirror.commands.autocomplete = function(cm) {
+	  }
+	};
+	
+	
 	function report(btn, selected) {
-
+		if(window.editor != undefined){
+			document.getElementById('query<%=(String) request.getParameter("questionId")%>').innerHTML = window.editor.getValue();
+		}
 		var sid = btn.name.split(" ")[1];
 		var asID = btn.name.split(" ")[2];
 		var qid = btn.name.split(" ")[3];
@@ -106,104 +141,95 @@ a:hover {
 
 				<%
 					String assignID = (String) request.getParameter("AssignmentID")
-							.trim();
-					String questionID = (String) request.getParameter("questionId")
-							.trim();
-					String courseID = (String) request.getParameter("courseId").trim();
-					String studentId = (String) request.getParameter("studentId")
-							.trim();
-					//get database properties
-					DatabaseProperties dbp = new DatabaseProperties();
-					String username = dbp.getUsername1(); //change user name according to your db user -testing1
-					String username2 = dbp.getUsername2();//This is for testing2
-					String passwd = dbp.getPasswd1(); //change user passwd according to your db user passwd
-					String passwd2 = dbp.getPasswd2();
-					String hostname = dbp.getHostname();
-					String dbName = dbp.getDbName();
-					String port = dbp.getPortNumber();
+									.trim();
+							String questionID = (String) request.getParameter("questionId")
+									.trim();
+							String courseID = (String) request.getParameter("courseId").trim();
+							String studentId = (String) request.getParameter("studentId")
+									.trim();
 
-					//get connection
-					Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-							dbName, username, passwd, port);
+							//get connection
+							Connection dbcon = (new DatabaseConnection()).graderConnection();
 
-					String output = "";
+							String output = "";
 
-					String listButton = "<input type=\"button\" name=\"button "
-							+ studentId
-							+ " "
-							+ assignID
-							+ " "
-							+ questionID
-							+ "\" "
-							+ " onClick=\"report(this,3)\""
-							+ " value=\"List Of Questions\" style=\"float:right;\"><br/>\n";
+							String listButton = "<input type=\"button\" name=\"button "
+									+ studentId
+									+ " "
+									+ assignID
+									+ " "
+									+ questionID
+									+ "\" "
+									+ " onClick=\"report(this,3)\""
+									+ " value=\"List Of Questions\" style=\"float:right;\"><br/>\n";
 
-					output += listButton
-							+ "<table  cellspacing=\"10\"  class=\"authors-list\" id=\"queryTable\" align=\"center\"> <tr> <th >Question ID</th>       <th >Question Text</th>  <th >Correct Query</th> <th> </th></tr>";
-					//get query details
-					try {
-						PreparedStatement stmt;
-						//stmt = dbcon.prepareStatement("SELECT * FROM  qinfo ,assignment where qinfo.assignment_id=? AND qinfo.assignment_id=assignment.assignment_id");
-						stmt = dbcon
-								.prepareStatement("SELECT * FROM  qinfo  where qinfo.assignmentid=? and qinfo.courseid=? and qinfo.questionid=?");
-						stmt.setString(1, assignID);
-						stmt.setString(2, (String) request.getSession().getAttribute("context_label"));
-						stmt.setString(3, (String) request.getParameter("questionId").trim());
-						System.out.println("QId :"	+ (String) request.getParameter("questionId"));
-						System.out.println("Course Id: " + (String) request.getSession().getAttribute("context_label"));
-						System.out.println("AssId :" + assignID);
-
-						ResultSet rs = stmt.executeQuery();
-						String qID = (String) request.getParameter("questionId");
-						while (rs.next()) {
-
-							String description = rs.getString("querytext");
-
-							/**check if student can edit his assignment*/
-							stmt = dbcon
-									.prepareStatement("SELECT * FROM  assignment where assignmentid=? and courseid=?");
-							stmt.setString(1, assignID.trim());
-							stmt.setString(2, courseID.trim());
-							ResultSet rs2 = stmt.executeQuery();
-							Timestamp start = null, end = null;
-							if (rs2.next()) {
-								start = rs2.getTimestamp("starttime");
-								end = rs2.getTimestamp("endtime");
-							}
-
-							boolean readOnly = false;
-							SimpleDateFormat formatter = new SimpleDateFormat(
-									"yyyy-MM-dd HH:mm:ss");
-							formatter.setLenient(false);
-							String ending = formatter.format(end);
-							String starting = formatter.format(start);
-							//String oldTime = "2012-07-11 10:55:21";
-							java.util.Date oldDate = formatter.parse(ending);
-							//get current date
-							Calendar c = Calendar.getInstance();
-
-							String currentDate = formatter.format(c.getTime());
-							java.util.Date current = formatter.parse(currentDate);
-
-							//compare times
-							if (oldDate.compareTo(current) < 0)
-								readOnly = true;
-
-							/**get student answers*/
+							output += listButton
+									+ "<table  cellspacing=\"10\"  class=\"authors-list\" id=\"queryTable\" align=\"center\"> <tr> <th >Question ID</th>       <th >Question Text</th>  <th >Correct Query</th> <th> </th></tr>";
+							//get query details
 							try {
-
+								PreparedStatement stmt;
+								//stmt = dbcon.prepareStatement("SELECT * FROM  qinfo ,assignment where qinfo.assignment_id=? AND qinfo.assignment_id=assignment.assignment_id");
 								stmt = dbcon
-										.prepareStatement("SELECT * FROM  queries  where queryid=? and rollnum=?");
-								
-								String queryId = "A"+assignID+"Q"+questionID.trim();
-								
-								stmt.setString(1, queryId);
-								stmt.setString(2, studentId);
-								ResultSet rs1 = stmt.executeQuery();
-								String studentAnswer = "";
-								if (rs1.next())
-									studentAnswer = rs1.getString("querystring");
-								if (readOnly) {%>
+										.prepareStatement("SELECT * FROM  qinfo  where qinfo.assignmentid=? and qinfo.courseid=? and qinfo.questionid=?");
+								stmt.setString(1, assignID);
+								stmt.setString(2, (String) request.getSession().getAttribute("context_label"));
+								stmt.setString(3, (String) request.getParameter("questionId").trim());
+								System.out.println("QId :"	+ (String) request.getParameter("questionId"));
+								System.out.println("Course Id: " + (String) request.getSession().getAttribute("context_label"));
+								System.out.println("AssId :" + assignID);
+
+								ResultSet rs = stmt.executeQuery();
+								String qID = (String) request.getParameter("questionId");
+								while (rs.next()) {
+
+									String description = rs.getString("querytext");
+
+									/**check if student can edit his assignment*/
+									stmt = dbcon
+											.prepareStatement("SELECT * FROM  assignment where assignmentid=? and courseid=?");
+									stmt.setString(1, assignID.trim());
+									stmt.setString(2, courseID.trim());
+									ResultSet rs2 = stmt.executeQuery();
+									Timestamp start = null, end = null;
+									if (rs2.next()) {
+										start = rs2.getTimestamp("starttime");
+										end = rs2.getTimestamp("endtime");
+									}
+
+									boolean readOnly = false;
+									SimpleDateFormat formatter = new SimpleDateFormat(
+											"yyyy-MM-dd HH:mm:ss");
+									formatter.setLenient(false);
+									String ending = formatter.format(end);
+									String starting = formatter.format(start);
+									//String oldTime = "2012-07-11 10:55:21";
+									java.util.Date oldDate = formatter.parse(ending);
+									//get current date
+									Calendar c = Calendar.getInstance();
+
+									String currentDate = formatter.format(c.getTime());
+									java.util.Date current = formatter.parse(currentDate);
+
+									//compare times
+									if (oldDate.compareTo(current) < 0)
+										readOnly = true;
+
+									/**get student answers*/
+									try {
+
+										stmt = dbcon
+												.prepareStatement("SELECT * FROM  queries  where queryid=? and rollnum=?");
+										
+										String queryId = "A"+assignID+"Q"+questionID.trim();
+										
+										stmt.setString(1, queryId);
+										stmt.setString(2, studentId);
+										ResultSet rs1 = stmt.executeQuery();
+										String studentAnswer = "";
+										if (rs1.next())
+											studentAnswer = rs1.getString("querystring");
+										if (readOnly) {
+				%>
 									<div class="questionelement">
 										<div class="question"><span>Q<%= qID %>. </span><%= description %></div>
 										<div class="answer"><label name='query' id='query<%=qID %>'><%=studentAnswer %></label></div>

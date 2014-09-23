@@ -11,6 +11,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import database.DatabaseProperties;
 
@@ -33,6 +34,14 @@ public class QueryStatus extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		HttpSession session=request.getSession();
+		
+		if (session.getAttribute("LOGIN_USER") == null || !session.getAttribute("LOGIN_USER").equals("ADMIN")) {
+			response.sendRedirect("index.html");
+			return;
+		}
+			
 		// TODO Auto-generated method stub
 		DatabaseProperties dbp = new DatabaseProperties();
 		String loginUser = dbp.getUsername1(); //change user name according to your db user -testing1
@@ -61,24 +70,17 @@ public class QueryStatus extends HttpServlet {
 		
 		"<script type=\"text/javascript\" src=\"scripts/wufoo.js\"></script>"+
 
-		"<link rel=\"stylesheet\" href=\"css/structure.css\" type=\"text/css\" />"+
-		"<link rel=\"stylesheet\" href=\"css/form.css\" type=\"text/css\" />"+
-		"<link rel=\"stylesheet\" href=\"css/theme.css\" type=\"text/css\" />"+
+		"<link rel=\"stylesheet\" href=\"css/structure.css\" type=\"text/css\" />" +
 
 		"<link rel=\"canonical\" href=\"http://www.wufoo.com/gallery/designs/template.html\">"+
-		"<style> html,body {background: #ccc;} fieldset {background: #f2f2e6; padding: 10px;	border: 1px solid #fff;	border-color: #fff #666661 #666661 #fff;	margin-bottom: 36px;}</style>"+
 		"</head>"+
 
 		"<body id=\"public\">"+
 
 		"<div id=\"fieldset\">"+
-
-
-		"<form class=\"wufoo\" action=\"TestCaseDataset\" method=\"get\">"+
-
-			"<div class=\"info\">"+
-			"<h2>Result</h2>"+
-			"</div>");
+		
+		"<fieldset><legend>Result</legend>" +
+		"<form class=\"wufoo\" action=\"TestCaseDataset\" method=\"get\">");
 		String assignment_id = request.getParameter("assignment_id");
 		String question_id = request.getParameter("question_id");
 		String result = "select * from queries left outer join users on queries.rollnum = users.id where queryid = ? order by rollnum, queryid";
@@ -92,12 +94,11 @@ public class QueryStatus extends HttpServlet {
 			ResultSet rs=pstmt.executeQuery();
 			boolean present = false;
 			
-			out_assignment.println("<table border=\"1\">");
-			out_assignment.println("<caption>Result</caption>");
-			out_assignment.println("<tr>"+
+			out_assignment.println("<table>");
+			out_assignment.println("<tr style='background: #E4E4E4; text-align: center;font-weight: bold;'>"+
 					"<td>Name</td>"+
 					"<td>Email</td>" +
-             		"<td>Student Answer</td>"+
+             		"<td style = 'width: 500px;'>Student Answer</td>"+
              		"<td>Status</td>"+
              		"<td>Failed Test cases</td>"+
 					"</tr>");
@@ -139,7 +140,7 @@ public class QueryStatus extends HttpServlet {
 		} 
         
      //   out_assignment.println("<input type=\"submit\"  name=\"\" value=\"Home page\" />");
-out_assignment.println("</form>"+
+out_assignment.println("</form></fieldset>"+
 				
 			"</div>"+
 			

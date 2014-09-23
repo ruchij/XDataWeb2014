@@ -5,39 +5,33 @@
 <title>Instructors Menu</title>
 
 <style>
-/* #navigation {
-	width: 100%;
-	height: 100%;
-	font-size: 16px;
-	font-family: Tahoma, Geneva, sans-serif;
-	font-weight: bold;
-	text-align: center;
-	text-shadow: 3px 2px 3px #333333;
-	background-color: #8AD9FF;
-	border-radius: 8px;
-}
-#navigation ul {
-    height: auto;
-    padding: 8px 0px;
-    margin: 0px;
-}
-#navigational li { 
-display: inline; 
-padding: 20px; 
-}
-#navigational a {
-    text-decoration: none;
-    color: #00F;
-    padding: 8px 8px 8px 8px;
+html{
+	border: 0px;
+	margin: 0px;
 }
 
-#navigational a:hover {
-    color: #F90;
-    background-color: #FFF;
-} */
+a{
+	color: #fff;
+}
+
+a:visited{
+	color: #fff;
+}
+
+#navigation{
+	border: 1px solid #A6A6B6;
+	height: 85%;
+	border-radius: 14px;
+	background: #E4E4E4;
+	padding: 25px 5px 5px;
+	margin-top: 20px;
+	position:absolute;
+	width:200px;
+}
+
 .vertical_menu {
 	float: left;
-	background-color: #EEFFFF;
+	/*background-color: #EEFFFF;*/
 	padding: 5px;
 	margin: 5px;
 	display: block;
@@ -48,41 +42,52 @@ padding: 20px;
 	padding: 5px; */
 }
 
-.vertical_menu li {
-	list-style: none;
-	margin: 5px;
-	padding-left: 0;
-	margin-left: 0;
-}
-
 .vertical_menu li a {
 	text-decoration: none;
-	color: black;
+	color: #353275;
 }
 
-.vertical_menu li a:hover {
+.vertical_menu li{
+	text-decoration: none;
+	color: #353275;
+	margin-bottom: 10px;
+	font-size: 15px;
+	list-style: none;
+}
+
+.vertical_menu a:hover {
 	text-decoration: underline;
+}
+
+#navigation div {
+	font-size: 11px;
+	bottom:0px;
+	position:absolute;
+}
+
+#navigation div a {
+	text-decoration: none;
+	color: #353275;
+	border-bottom: 1px dotted black;
 }
 </style>
 </head>
-<body style="background-color: #b0c4de;">
+<body style="font-family: helvetica;text-decoration: none;">
 
 	<div id="navigation">
 		<ul class="vertical_menu">
-			<a class="header" target="rightPage" href="schemaUpload.html"><li>
-					Upload Schema</li></a>
-			<a class="header" target="rightPage" href="initialDataUpload.jsp"><li>
-					Upload Sample Data</li></a>
-			<a class="header" target="rightPage" href="NewDatabaseConnection.jsp"><li>
-					New Database Connection</li></a>
-			<a class="header" target="rightPage" href="NewAssignmentCreation.jsp"><li>
-					New Assignment</li></a>
-			<a class="header" target="rightPage" href="ListAllAssignments.jsp"><li>
-					View All Assignments</li> <a class="header" target="rightPage"
-				href="asgnmentList.jsp"><li>View Present Assignment</li>
+			<li><a class="header" target="rightPage" href="schemaUpload.html">Upload Schema</a></li>
+			<li><a class="header" target="rightPage" href="initialDataUpload.jsp">Upload Sample Data</a></li>
+			<li><a class="header" target="rightPage" href="NewDatabaseConnection.jsp">New Database Connection</a></li>
+			<li><a class="header" target="rightPage" href="NewAssignmentCreation.jsp">New Assignment</a></li>
+			<li><a class="header" target="rightPage" href="ListAllAssignments.jsp">View All Assignments</a></li>
+			<li><a class="header" target="rightPage" href="asgnmentList.jsp">View Present Assignment</a></li>
 		</ul>
+		<div>
+		<a href='http://www.cse.iitb.ac.in/infolab/xdata/' target='_blank'>About XData</a>
+		<p class="copyright">© 2014 IIT Bombay. All rights reserved</p>
+		</div>
 	</div>
-
 
 </body>
 </html>

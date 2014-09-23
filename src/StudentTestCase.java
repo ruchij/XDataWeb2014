@@ -85,13 +85,15 @@ public class StudentTestCase extends HttpServlet {
 		
 		int assignment_id=Integer.parseInt(request.getParameter("assignment_id"));
 		int question_id=Integer.parseInt(request.getParameter("question_id"));
+		String course_id = (String) request.getSession().getAttribute("context_label");
 		String user_id=request.getParameter("user_id");
 		String status = request.getParameter("status");
+		Boolean learningMode = false;
 		
 		System.out.println("Assignment_id :"+assignment_id);
 		System.out.println("Question_id :"+question_id);
 		System.out.println("User id : "+user_id);
-		String dataset_sel="select datasetid,result,tag from detectdataset natural join datasetvalue where  user_id=? and queryid=?";
+		String dataset_sel="select datasetid,result,tag from detectdataset natural join datasetvalue where  user_id=? and queryid=? order by datasetid";
 		
 		if(dbCon == null){
 			dbCon=(Connection) session.getAttribute("dbConnection");
@@ -115,6 +117,22 @@ public class StudentTestCase extends HttpServlet {
 		    	       System.err.println("SQLException: " + ex.getMessage());
 		    	}	
 		}
+		
+		try {
+			PreparedStatement statement = dbCon.prepareStatement("select * from assignment where courseid = ? and assignmentid=?");
+			
+			statement.setString(1, course_id);
+			statement.setString(2, Integer.toString(assignment_id));
+			ResultSet resultSet = statement.executeQuery();
+			
+			if(resultSet.next()){
+				learningMode = resultSet.getBoolean("learning_mode");
+			}  	 
+		}
+		catch (SQLException ex) {
+	       System.err.println("SQLException: " + ex.getMessage());
+		}	
+		
        	response.setContentType("text/html");
 		PrintWriter out_assignment = response.getWriter();
 		out_assignment.println("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\""+
@@ -155,182 +173,181 @@ public class StudentTestCase extends HttpServlet {
 		
 		try {
 			   /**get correct query and student query*/
-	        PreparedStatement stmt2=dbCon.prepareStatement("select correctquery from qinfo where courseid = ? and assignmentid=? and questionid=? ");
-	        String course_id = (String) request.getSession().getAttribute(
-					"context_label");
-			stmt2.setString(1, course_id);
-			stmt2.setString(2, Integer.toString(assignment_id));
-			stmt2.setString(3, Integer.toString(question_id));
-			ResultSet rs2 = stmt2.executeQuery();
-			String out = "<p align=\"left\"> <strong>Instructor's Answer: </strong>";
-			while(rs2.next()){
-				out += CommonFunctions.encodeHTML(rs2.getString("correctquery"));
-				
+			if(learningMode){
+		        PreparedStatement stmt2=dbCon.prepareStatement("select correctquery from qinfo where courseid = ? and assignmentid=? and questionid=? ");
+				stmt2.setString(1, course_id);
+				stmt2.setString(2, Integer.toString(assignment_id));
+				stmt2.setString(3, Integer.toString(question_id));
+				ResultSet rs2 = stmt2.executeQuery();
+				String out = "<p align=\"left\"> <strong>Instructor's Answer: </strong>";
+				while(rs2.next()){
+					out += CommonFunctions.encodeHTML(rs2.getString("correctquery"));
+					
+				}
+				out += "</p>";
+				out_assignment.println(out);
 			}
-			out += "</p>";
-			out_assignment.println(out);
-			
-			PreparedStatement stmt1=dbCon.prepareStatement(dataset_sel);
-			stmt1.setString(1, user_id);
-			stmt1.setString(2, "A"+assignment_id+"Q"+question_id);
-			ResultSet rs=stmt1.executeQuery();
 			
 			if(status.equals("Incorrect")){
 				out_assignment.println("<div style = 'font-weight: bold'>Status: <label style = 'color:red;'>Incorrect</label></div>");
-				out_assignment.println("<br/><div style = 'font-weight:bold'>Message: <span style='font-weight:normal'>Your query did not pass the datasets shown below.</span></div>");
-				out_assignment.println("<br/><hr>");
+				
 			}
 			
-			while(rs.next() && !status.equals("Error") && !status.equals("Correct")){
-				String s=null;
+			if(learningMode && status.equals("Incorrect")){
 				
-				String args[] = {rs.getString("datasetid"), "A"+assignment_id+"Q"+question_id};
-				try {
-					PopulateTestData.entry(args);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		     
-				out_assignment.println("<h4>"+rs.getString("tag")+"</h4>");
-				out_assignment.println("<p></p>");
+				out_assignment.println("<br/><div style = 'font-weight:bold'>Message: <span style='font-weight:normal'>Your query did not pass the datasets shown below.</span></div>");
+				out_assignment.println("<br/><hr>");
 				
-				out_assignment.println("<div style='height: 100px;'>");
-				out_assignment.println("<div style='float:left;margin-right: 30%;'>");
-				out_assignment.println("<span> Your result</span>");			
+				PreparedStatement stmt1=dbCon.prepareStatement(dataset_sel);
+				stmt1.setString(1, user_id);
+				stmt1.setString(2, "A"+assignment_id+"Q"+question_id);
+				ResultSet rs=stmt1.executeQuery();
 				
-				out_assignment.println("<table border=\"0\">");
-			     out_assignment.println("<tr>");
+				while(rs.next() && !status.equals("Error") && !status.equals("Correct")){
+					String s=null;
+					
+					String args[] = {rs.getString("datasetid"), "A"+assignment_id+"Q"+question_id};
+					try {
+						PopulateTestData.entry(args);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 			     
-			     String result[]=rs.getString("result").split(":::");
-				 String column_names[]=result[0].split("@@");
-				 int no_of_columns=column_names.length;
-			     for(int cl=0;cl<no_of_columns;cl++)
-			     {
-			    	 out_assignment.println("<th>"+column_names[cl]+"</th>");
-			     }
-			     out_assignment.println("</tr>");
-			     int no_of_rows=result.length;
-			     for(int k=1;k<no_of_rows;k++)
-			     {
-			    	 out_assignment.println("<tr>");
-			    	 String columns[]=result[k].split("@@");
-			    	 for(int j=0;j<no_of_columns;j++)
-			    	 {
-			    		 out_assignment.println("<td>"+columns[j]+"</td>");
-			         }
-			    	 out_assignment.println("</tr>");
-			     }
-			     out_assignment.println("</table>");
-			     out_assignment.println("</div>");
-			     String sel_query = "select correctquery from qinfo where assignmentid=? and questionid=?";
-			     PreparedStatement qstmt=dbCon.prepareStatement(sel_query);
-			     qstmt.setString(1,assignment_id+"");
-			     qstmt.setString(2, question_id+"");
-			     ResultSet rr=qstmt.executeQuery();
-			     rr.next();
-			     PreparedStatement stmt=testcon.prepareStatement(rr.getString("correctquery"));
-			     rr.close();
-			     ResultSet r=stmt.executeQuery();
-			     ResultSetMetaData metadata = r.getMetaData();
-			     no_of_columns=metadata.getColumnCount();
-			     out_assignment.println("<p></p>");
-			     out_assignment.println("<div style='float:left;margin-right: 20%;'>");
-			     out_assignment.println("<span> Expected Result</span>");
-			     out_assignment.println("<table border=\"1\">");
-			     out_assignment.println("<tr>");
-			     for(int cl=1;cl<=no_of_columns;cl++)
-			     {
-			    	 out_assignment.println("<th>"+metadata.getColumnLabel(cl)+"</th>");
-			     }
-			     out_assignment.println("</tr>");
-			     while(r.next())
-			     {
-			    	 out_assignment.println("<tr>");
-			    	 for(int j=1;j<=no_of_columns;j++)
-			    	 {
-			    		 int type = metadata.getColumnType(j);
-			             if (type == Types.VARCHAR || type == Types.CHAR) {
-			            	 out_assignment.println("<td>"+r.getString(j)+"</td>");
-			             } else {
-			            	 out_assignment.println("<td>"+r.getLong(j)+"</td>");
-			             }
-			    		
-			    	 }
-			    	 out_assignment.println("</tr>");
-			     }
-			     r.close();
-			     out_assignment.println("</table>");
-			     out_assignment.println("</div>");
-			     out_assignment.println("</div>");
-				PreparedStatement pstmt=dbCon.prepareStatement("select value from datasetvalue where queryid=? and datasetid=?");
-				pstmt.setString(1, "A"+assignment_id+"Q"+question_id);
-				pstmt.setString(2, rs.getString("datasetid"));
-				ResultSet rsi=pstmt.executeQuery();
-				rsi.next();
-				String value=rsi.getString("value");
-				String tables[]=value.split(":::");
-				out_assignment.println("<div>");
-				out_assignment.println("<a class='showhidelink' href = 'javascript:void(0);' onclick=\"toggleDataset('#"+rs.getString("datasetid")+"')\">View Dataset</a>");
-				out_assignment.println("<div class='detail' id='"+rs.getString("datasetid")+"'>");
-				for(String table : tables)
-				{
-					String tname,values;
+					out_assignment.println("<h4>"+rs.getString("tag")+"</h4>");
 					out_assignment.println("<p></p>");
-					tname=table.substring(0, table.indexOf(".copy"));
-					values=table.substring(table.indexOf(".copy")+5);
-					/*String seltable="Select * from "+tname;
-					PreparedStatement stmt=dbcon.prepareStatement(seltable);
-					ResultSet rst=stmt.executeQuery();
-					 ResultSetMetaData rsmd = rst.getMetaData();
-					 */
-					out_assignment.println("<table border=\"1\">");
-					out_assignment.println("<caption>"+tname+"</caption>");
 					
-					PreparedStatement detailStmt = dbCon.prepareStatement("select * from " + tname + " where 1 = 0");
-					ResultSetMetaData columnDetail = detailStmt.executeQuery().getMetaData();
+					out_assignment.println("<div style='height: 100px;'>");
+					out_assignment.println("<div style='float:left;margin-right: 30%;'>");
+					out_assignment.println("<span> Your result</span>");			
 					
-					out_assignment.println("<p></p>");
-					out_assignment.println("<table border=\"1\">");
-					out_assignment.println("<tr>");
-				     for(int cl=1; cl <= columnDetail.getColumnCount(); cl++)
+					out_assignment.println("<table border=\"0\">");
+				     out_assignment.println("<tr>");
+				     
+				     String result[]=rs.getString("result").split(":::");
+					 String column_names[]=result[0].split("@@");
+					 int no_of_columns=column_names.length;
+				     for(int cl=0;cl<no_of_columns;cl++)
 				     {
-				    	 out_assignment.println("<th>" + columnDetail.getColumnLabel(cl)+"</th>");
+				    	 out_assignment.println("<th>"+column_names[cl]+"</th>");
 				     }
 				     out_assignment.println("</tr>");
-					
-					String rows[]=values.split("::");
-					for(String row: rows)
+				     int no_of_rows=result.length;
+				     for(int k=1;k<no_of_rows;k++)
+				     {
+				    	 out_assignment.println("<tr>");
+				    	 String columns[]=result[k].split("@@");
+				    	 for(int j=0;j<no_of_columns;j++)
+				    	 {
+				    		 out_assignment.println("<td>"+columns[j]+"</td>");
+				         }
+				    	 out_assignment.println("</tr>");
+				     }
+				     out_assignment.println("</table>");
+				     out_assignment.println("</div>");
+				     String sel_query = "select correctquery from qinfo where assignmentid=? and questionid=?";
+				     PreparedStatement qstmt=dbCon.prepareStatement(sel_query);
+				     qstmt.setString(1,assignment_id+"");
+				     qstmt.setString(2, question_id+"");
+				     ResultSet rr=qstmt.executeQuery();
+				     rr.next();
+				     PreparedStatement stmt=testcon.prepareStatement(rr.getString("correctquery"));
+				     rr.close();
+				     ResultSet r=stmt.executeQuery();
+				     ResultSetMetaData metadata = r.getMetaData();
+				     no_of_columns=metadata.getColumnCount();
+				     out_assignment.println("<p></p>");
+				     out_assignment.println("<div style='float:left;margin-right: 20%;'>");
+				     out_assignment.println("<span> Expected Result</span>");
+				     out_assignment.println("<table border=\"1\">");
+				     out_assignment.println("<tr>");
+				     for(int cl=1;cl<=no_of_columns;cl++)
+				     {
+				    	 out_assignment.println("<th>"+metadata.getColumnLabel(cl)+"</th>");
+				     }
+				     out_assignment.println("</tr>");
+				     while(r.next())
+				     {
+				    	 out_assignment.println("<tr>");
+				    	 for(int j=1;j<=no_of_columns;j++)
+				    	 {
+				    		 int type = metadata.getColumnType(j);
+				             if (type == Types.VARCHAR || type == Types.CHAR) {
+				            	 out_assignment.println("<td>"+r.getString(j)+"</td>");
+				             } else {
+				            	 out_assignment.println("<td>"+r.getLong(j)+"</td>");
+				             }
+				    		
+				    	 }
+				    	 out_assignment.println("</tr>");
+				     }
+				     r.close();
+				     out_assignment.println("</table>");
+				     out_assignment.println("</div>");
+				     out_assignment.println("</div>");
+					PreparedStatement pstmt=dbCon.prepareStatement("select value from datasetvalue where queryid=? and datasetid=?");
+					pstmt.setString(1, "A"+assignment_id+"Q"+question_id);
+					pstmt.setString(2, rs.getString("datasetid"));
+					ResultSet rsi=pstmt.executeQuery();
+					rsi.next();
+					String value=rsi.getString("value");
+					String tables[]=value.split(":::");
+					out_assignment.println("<div>");
+					out_assignment.println("<a class='showhidelink' href = 'javascript:void(0);' onclick=\"toggleDataset('#"+rs.getString("datasetid")+"')\">View Dataset</a>");
+					out_assignment.println("<div class='detail' id='"+rs.getString("datasetid")+"'>");
+					for(String table : tables)
 					{
-						String columns[]=row.split("\\|");
+						String tname,values;
+						out_assignment.println("<p></p>");
+						tname=table.substring(0, table.indexOf(".copy"));
+						values=table.substring(table.indexOf(".copy")+5);
+						out_assignment.println("<table border=\"1\">");
+						out_assignment.println("<caption>"+tname+"</caption>");
+						
+						PreparedStatement detailStmt = dbCon.prepareStatement("select * from " + tname + " where 1 = 0");
+						ResultSetMetaData columnDetail = detailStmt.executeQuery().getMetaData();
+						
+						out_assignment.println("<p></p>");
+						out_assignment.println("<table border=\"1\">");
 						out_assignment.println("<tr>");
-						for(String column: columns)
+					     for(int cl=1; cl <= columnDetail.getColumnCount(); cl++)
+					     {
+					    	 out_assignment.println("<th>" + columnDetail.getColumnLabel(cl)+"</th>");
+					     }
+					     out_assignment.println("</tr>");
+						
+						String rows[]=values.split("::");
+						for(String row: rows)
 						{
-							out_assignment.println("<td>"+column+"</td>");
+							String columns[]=row.split("\\|");
+							out_assignment.println("<tr>");
+							for(String column: columns)
+							{
+								out_assignment.println("<td>"+column+"</td>");
+							}
+							out_assignment.println("</tr>");
 						}
-						out_assignment.println("</tr>");
+						
+						out_assignment.println("</table>");
 					}
 					
-					out_assignment.println("</table>");
+					 out_assignment.println("</div>");
+					 out_assignment.println("</div>");
+				     out_assignment.println("<p></p>");
+				     
+					out_assignment.println("<hr>");
+					
 				}
-				//out_assignment.println("<h5>Result of executing query</h5>");
-				
-/*				 PreparedStatement stmt=testcon.prepareStatement("");
-			     ResultSet r=stmt.executeQuery();
-			     ResultSetMetaData metadata = r.getMetaData();
-			     int no_of_columns=metadata.getColumnCount();*/
-
-				 out_assignment.println("</div>");
-				 out_assignment.println("</div>");
-			     out_assignment.println("<p></p>");
-			     
-				out_assignment.println("<hr>");
-				
 			}
 			
 			if(status.equals("Error")){
 				out_assignment.println("<div style = 'font-weight: bold'>Status: <label style = 'color:red;'>Error</label></div>");
 				out_assignment.println("<br/><div style = 'font-weight:bold'>Message: <span style='font-weight:normal;'>Sorry, your query could not be executed. Please check the syntax and try again.</span></div>");
+				String message = request.getParameter("Error");
+				
+				if(!message.isEmpty()){
+					out_assignment.println("<br/><div style = 'font-weight:bold'> Error Message: <span style='font-weight:normal;'>" + CommonFunctions.decodeURIComponent(message) + "</span></div>");
+				}
 			}
 			
 			if(status.equals("Correct")){

@@ -1,7 +1,7 @@
 <%@ page import="java.io.*"%>
 <%@ page import="java.util.*"%>
 <%@page import="java.sql.*"%>
-<%@page import="database.DatabseConnection"%>
+<%@page import="database.DatabaseConnection"%>
 <%@page import="database.FileToSql"%>
 <%@page import="database.FileHandler"%>
 <%@page import="database.DatabaseProperties" %>

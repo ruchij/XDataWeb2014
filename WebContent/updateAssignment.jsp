@@ -3,7 +3,7 @@
 <%@page import="java.io.*"%>
 <%@page import="java.text.*"%>
 <%@page import="java.sql.*"%>
-<%@page import="database.DatabseConnection"%>
+<%@page import="database.DatabaseConnection"%>
 <%@page import="database.DatabaseProperties"%>
 <%@page import="database.UpdateServlet"%>
 <head> 
@@ -61,18 +61,15 @@ nav ul li:hover {
 </style>
 
 <%
-	/*
-	 //String noOfQuestions=request.getParameter("NumberOfQuestions");
-	 String startTime=request.getParameter("starttime");
-	 String endTime=request.getParameter("endtime");
-	 String startDate=request.getParameter("startdate");
-	 String endDate=request.getParameter("enddate");
-	 */
+	if (session.getAttribute("LOGIN_USER") == null || !session.getAttribute("LOGIN_USER").equals("ADMIN")) {
+		response.sendRedirect("index.html");
+		return;
+	}
 
 	//getting parameters 
 	String description = (String) request.getParameter("description");
 	String courseId = (String) request.getSession().getAttribute(
-			"context_label");
+	"context_label");
 
 	String dbPassword = "testing2";
 	String dbuserName = "testing2";
@@ -80,7 +77,7 @@ nav ul li:hover {
 	String dbType = "";
 	String schemaId = "";
 	String assignID = (String) request.getSession().getAttribute(
-			"resource_link_id");
+	"resource_link_id");
 
 	String startmonth = request.getParameter("startmonth");
 	String startday = request.getParameter("startday");
@@ -90,7 +87,7 @@ nav ul li:hover {
 	String startampm = request.getParameter("startampm");
 
 	int starttime = (Integer.parseInt(starthour))
-			+ (Integer.parseInt(startampm));
+	+ (Integer.parseInt(startampm));
 
 	String endmonth = request.getParameter("endmonth");
 	String endday = request.getParameter("endday");
@@ -100,39 +97,27 @@ nav ul li:hover {
 	String endampm = request.getParameter("endampm");
 
 	int endtime = (Integer.parseInt(endhour))
-			+ (Integer.parseInt(endampm));
+	+ (Integer.parseInt(endampm));
 
 	String startDate = startday + "-" + startmonth + "-" + startyear
-			+ " " + starttime + ":" + startmin + ":" + "00";
+	+ " " + starttime + ":" + startmin + ":" + "00";
 	String endDate = endday + "-" + endmonth + "-" + endyear + " "
-			+ endtime + ":" + endmin + ":" + "00";
+	+ endtime + ":" + endmin + ":" + "00";
 	
 	/**FIXME: update the data base properties for this assignment for this assignmnet, courseid*/
-	
-
-	//get database properties
-	DatabaseProperties dbp = new DatabaseProperties();
-	String username = dbp.getUsername1(); //change user name according to your db user -testing1
-	String username2 = dbp.getUsername2();//This is for testing2
-	String passwd = dbp.getPasswd1(); //change user passwd according to your db user passwd
-	String passwd2 = dbp.getPasswd2();
-	String hostname = dbp.getHostname();
-	String dbName = dbp.getDbName();
-	String port = dbp.getPortNumber();
 
 	//get the assignment ID after updating the assignment table
 	//int assignID=0;
 
 	Connection dbcon = null;
 
-	dbcon = (new DatabseConnection()).dbConnection(hostname, dbName,
-			username, passwd, port);
+	dbcon = (new DatabaseConnection()).graderConnection();
 
 	try {
 		PreparedStatement stmt, stmt1;
 		//insert into assignment
 		stmt = dbcon
-				.prepareStatement("INSERT INTO assignment VALUES (?,?, ?, ?, ?, ?, ?, ?, to_timestamp(?,'dd-mm-yyyy hh24:mi:ss'),to_timestamp(?,'dd-mm-yyyy hh24:mi:ss'))");
+		.prepareStatement("INSERT INTO assignment VALUES (?,?, ?, ?, ?, ?, ?, ?, to_timestamp(?,'dd-mm-yyyy hh24:mi:ss'),to_timestamp(?,'dd-mm-yyyy hh24:mi:ss'))");
 
 		stmt.setString(1, courseId);
 		/**FIXME: Change this*/
@@ -175,30 +160,30 @@ nav ul li:hover {
 	//str +="<input type=\"hidden\" name=\"question_id\" >";
 
 	str += "<table  cellspacing=\"10\"  align=\"center\" class=\"authors-list\" id=\"queryTable\"> <tr> <th > <label class=\"field\">QueStion ID</label></th> <th >  <label class=\"field\"> Question Description </label></th>  <th > <label class=\"field\">Correct Query </label></th> <th></th> <th></th></tr>"
-			+ "\n";
+	+ "\n";
 
 	//for(int i=0;i<number;i++){
 	str = str
-			.concat("<tr id=\"1\" class =\"1\"> <td><p name=\"qID\">Question: 1</label></td>"
-					+ "\n");
+	.concat("<tr id=\"1\" class =\"1\"> <td><p name=\"qID\">Question: 1</label></td>"
+			+ "\n");
 	str += "<td><textarea name=\"quesTxt1\" id=\"quesTxt1\" rows=\"6\" cols=\"35\"> </textarea> </td> "
-			+ "\n";
+	+ "\n";
 	str = str
-			.concat(" <td><textarea id=\"query 1 1\" class = \"query1\" name = \"query1\" rows=\"6\" cols=\"35\" ></textarea></td>"
-					+ "\n");
+	.concat(" <td><textarea id=\"query 1 1\" class = \"query1\" name = \"query1\" rows=\"6\" cols=\"35\" ></textarea></td>"
+			+ "\n");
 	//str = str.concat("<td> <nav><ul> <ol> <a href=\"javascript:void(0)\" onclick=\"submitter(this,'queryTable')\" id=\"button 1 1\">Generate DataSet</a> </ol> "+
 	//				" <ol></ol> <a href=\"javascript:void(0)\" onClick=\"addCorrectQuery(this, 'queryTable')\" id=\"button 1 1\">Add Correct Query</a>  </ul> </nav> </td>");
 	//str=str.concat("<td> <input type=\"button\" id=\"button 1 1\" value=\"Generate Dataset\" onclick=\"submitter(this,'queryTable')\"> </td>"+"\n");
 	str = str
-			.concat("<td> <input type=\"button\" id=\"button 1 "
-					+ assignID
-					+ "\" name=\"button 1 "
-					+ assignID
-					+ "\" value=\"Update Query\" onclick=\"report(this,1)\"> <br/>"
-					+ "\n");
+	.concat("<td> <input type=\"button\" id=\"button 1 "
+			+ assignID
+			+ "\" name=\"button 1 "
+			+ assignID
+			+ "\" value=\"Update Query\" onclick=\"report(this,1)\"> <br/>"
+			+ "\n");
 	str = str
-			.concat("<input type=\"button\" id=\"button1 1\" onClick=\"addCorrectQuery(this, 'queryTable')\" value=\"Add More Correct Queries\" > <input type=\"hidden\" name=\"qID\" value=\"1\"></td> </tr>"
-					+ "\n");
+	.concat("<input type=\"button\" id=\"button1 1\" onClick=\"addCorrectQuery(this, 'queryTable')\" value=\"Add More Correct Queries\" > <input type=\"hidden\" name=\"qID\" value=\"1\"></td> </tr>"
+			+ "\n");
 	str = str.concat("</table>");
 
 	/*	
@@ -385,11 +370,11 @@ nav ul li:hover {
 	out.println("<form class=\"updateQuery\" name=\"updateQuery\" action=\"updateQuery.jsp\" method=\"post\" onsubmit=\"return(validate());\" >");
 
 	out.println("<p class=\"required\">* Required</p>"
-			+ "<div class=\"fieldset\">" + "<fieldset>"
-			+ "<legend> Create a new assignment</legend>");
+	+ "<div class=\"fieldset\">" + "<fieldset>"
+	+ "<legend> Create a new assignment</legend>");
 
 	out.println("<p><label class=\"field\">Asssignment ID: " + assignID
-			+ "</label></p>");
+	+ "</label></p>");
 
 	out.println("<p><label class=\"field\">Enter the query details one by one</p>");
 	//String ht="alert ("+str+")";

@@ -65,120 +65,130 @@ a:hover {
 	height: 100%;
 	overflow: hidden;
 }
-</style>
 
+.separator{
+	border-right:1px solid black; 
+	margin:0px; 
+	float: right; 
+	margin-right: 3px;
+	width:1px;
+	margin-left: 2px;
+}
+
+</style>
+</head>
+<body>
 <div>
 	<br /> <br />
 	<div class="fieldset">
 		<fieldset>
 			<legend> Assignment Instructions</legend>
-
-
+			
 			<%
-				//int assignID=Integer.parseInt(request.getParameter("AssignmentID").trim());
-				String courseID = (String) request.getSession().getAttribute(
-						"context_label");
-				String assignID = (String) request.getSession().getAttribute(
-						"resource_link_id");
-				//get database properties
-				DatabaseProperties dbp = new DatabaseProperties();
-				String username = dbp.getUsername1(); //change user name according to your db user -testing1
-				String username2 = dbp.getUsername2();//This is for testing2
-				String passwd = dbp.getPasswd1(); //change user passwd according to your db user passwd
-				String passwd2 = dbp.getPasswd2();
-				String hostname = dbp.getHostname();
-				String dbName = dbp.getDbName();
-				String port = dbp.getPortNumber();
-				
-				//get connection
-				Connection dbcon = (new DatabseConnection()).dbConnection(hostname, dbName, username, passwd, port);
-				Timestamp start = null;
-				Timestamp end = null;
 
-				String instructions = (new CommonFunctions()).getAssignmnetIinstructions(courseID, assignID);
-			%>
-			<%
-				String output = "<table cellspacing=\"20\"  class=\"authors-list\" id=\"queryTable\" align=\"center\">  <tr> <th >Query ID</th> <th >Question Description</th>  <th >Correct Query</th> <th> </th><th> </th></tr>"
-						+ "\n";
-				String qID = "";
-				String text = "";
-				String correct = "";
-				//execute queryinfo table to get qIDs
-				try {
-					PreparedStatement stmt;
-					stmt = dbcon
-							.prepareStatement("SELECT * FROM  qinfo  where assignmentid=? and courseid = ?");
-					stmt.setString(1, assignID);
-					stmt.setString(2, courseID);
-					ResultSet rs;
-					rs = stmt.executeQuery();
-					while (rs.next()) {
-						qID = rs.getString("questionid");
-						text = rs.getString("querytext");
-						correct = rs.getString("correctquery");
-						output += "<tr> <td> <p name=\"qID\" id=\"qID" + qID
-								+ "\">Question: " + qID + "</p></td> "
-								+ "<td> <p name=\"quesTxt\">" + text
-								+ " </p> </td> <td><p name=\"query\" id=\"query"
-								+ qID + "\" p>" + correct + " </p></td>";
-						//output+="<td> <a href=\"AssignmentChecker?assignment_id="+assignID+"&question_id="+qID+"&query="+correct+" \" > <span style=\"color:blue;font-size:20px\">Generate Dataset</span> </a></td> "+"\n";
-						/* 	output += "<td> &nbsp;<input type=\"button\" id=\"button "
-									+ qID
-									+ "\" value=\"Generate Dataset\"  onclick=\"submitter(this,'queryTable')\"> </td>"
-									+ "\n"; */
-						String generate = "AssignmentChecker?assignment_id="
-								+ assignID + "&&question_id=" + qID + "&&query="
-								+ correct + "'\"target = \"rightPageBottom\"";
-						String evaluate = "EvaluateQuestion?assignment_id="
-								+ assignID + "&&question_id=" + qID
-								+ "'\"target = \"rightPageBottom\"";
-						String status = "QueryStatus?assignment_id=" + assignID
-								+ "&&question_id=" + qID
-								+ "'\"target = \"rightPageBottom\"";
-
-						output += "<td><input type=\"button\" onClick=\"window.location.href='"
-								+ generate
-								+ " value=\"Generate Dataset\" > <br/> \n "
-
-								+ "<input type=\"button\" onClick=\"window.location.href='"
-								+ evaluate
-								+ " value=\"Evaluate Question\" > <br/> \n "
-								//+"Show status of data generation and status of question evaluation, depending on this enable buttons<br/>if already generated ask to kill it or not"
-								+ "<input type=\"button\" onClick=\"window.location.href='"
-								+ status
-								+ " value=\"Status Of Question\" > <br/> \n "
-								+ "</td>";
-
-						/* //evaluate
-						output += "<td> &nbsp; <a href=\"EvaluateQuestion?assignment_id="
-								+ assignID
-								+ "&question_id="
-								+ qID
-								+ "\" > <span>Evaluate</span> </a> </td></tr>"
-								+ "\n"; */
-						//output+="<td> <input type=\"button\" id=\"button "+qID+"\" value=\"Evaluate\" onclick=\"submitter(this,'queryTable')\"> </td></tr>"+"\n";
+					if (session.getAttribute("LOGIN_USER") == null || !session.getAttribute("LOGIN_USER").equals("ADMIN")) {
+						response.sendRedirect("index.html");
+						return;
 					}
+			
+					String courseID = (String) request.getSession().getAttribute(
+						"context_label");
+					String assignID = (String) request.getSession().getAttribute(
+						"resource_link_id");
+					String instructions = (new CommonFunctions())
+							.getAssignmnetIinstructions(courseID, assignID);
 					
-					rs.close();
-					output += "</table>";
-				} catch (Exception err) {
-					err.printStackTrace();
-				}
-				finally{
-					dbcon.close();
-				}
-				out.println(instructions);
-			%>
+					out.println(instructions);
+				%>
 		</fieldset>
 		<fieldset>
 			<legend> List of Questions</legend>
-			<form class="wufoo" name="Form" action="evaluateAssignment.jsp"
-				method="post">
+			<form class="wufoo" name="Form" action="evaluateAssignment.jsp"	method="post">
 				<%
-					out.println(output);
+					//int assignID=Integer.parseInt(request.getParameter("AssignmentID").trim());
+
+							
+							//get connection
+							Connection dbcon = (new DatabaseConnection()).graderConnection();
+							Timestamp start = null;
+							Timestamp end = null;
+				%>
+				<%
+					String output = "<table cellspacing=\"20\"  class=\"authors-list\" id=\"queryTable\" align=\"center\">  <tr> <th >Query ID</th> <th >Question Description</th>  <th >Correct Query</th> <th> </th><th> </th></tr>"
+							+ "\n";
+					String qID = "";
+					String text = "";
+					String correct = "";
+					//execute queryinfo table to get qIDs
+					try {
+						PreparedStatement stmt;
+						stmt = dbcon
+								.prepareStatement("SELECT * FROM  qinfo  where assignmentid=? and courseid = ? order by questionid");
+						stmt.setString(1, assignID);
+						stmt.setString(2, courseID);
+						ResultSet rs;
+						rs = stmt.executeQuery();
+						while (rs.next()) {
+							qID = rs.getString("questionid");
+							text = rs.getString("querytext");
+							correct = rs.getString("correctquery");
+							output += "<tr> <td> <p name=\"qID\" id=\"qID" + qID
+									+ "\">Question: " + qID + "</p></td> "
+									+ "<td> <p name=\"quesTxt\">" + text
+									+ " </p> </td> <td><p name=\"query\" id=\"query"
+									+ qID + "\" p>" + correct + " </p></td>";
+			
+							String generate = "AssignmentChecker?assignment_id="
+									+ assignID + "&&question_id=" + qID + "&&query="
+									+ CommonFunctions.encodeHTML(correct) + "'\"target = \"rightPageBottom\"";
+							String evaluate = "EvaluateQuestion?assignment_id="
+									+ assignID + "&&question_id=" + qID
+									+ "'\"target = \"rightPageBottom\"";
+							String status = "QueryStatus?assignment_id=" + assignID
+									+ "&&question_id=" + qID
+									+ "'\"target = \"rightPageBottom\"";
+
+							output += "<td><input type=\"button\" onClick=\"window.location.href='"
+									+ generate
+									+ " value=\"Generate Dataset\" > <br/> \n "
+
+									+ "<input type=\"button\" onClick=\"window.location.href='"
+									+ evaluate
+									+ " value=\"Evaluate Question\" > <br/> \n "
+									//+"Show status of data generation and status of question evaluation, depending on this enable buttons<br/>if already generated ask to kill it or not"
+									+ "<input type=\"button\" onClick=\"window.location.href='"
+									+ status
+									+ " value=\"Status Of Question\" > <br/> \n "
+									+ "</td>";
+						
+							%>
+							
+							<div class="questionelement">
+								<div class="question"><span>Q<%= qID %>. </span><%= text %></div>
+								<div class="answer"><span>Ans. </span><%= CommonFunctions.encodeHTML(correct) %></div>
+								<div class="editbutton">
+									<a href=' <%=generate %>'><%="Generate Dataset" %></a>
+									<span class = "separator">&nbsp;</span>
+									<a href=' <%=evaluate %>'><%="Evaluate Question" %></a>
+									<span class = "separator">&nbsp;</span>
+									<a href='<%=status %>'><%="Status of Question" %></a>
+								</div>								
+							</div>
+							<%
+									
+						}
+						
+						rs.close();
+						output = "";
+					} catch (Exception err) {
+						err.printStackTrace();
+					}
+					finally{
+						dbcon.close();
+					}
+					
 					out.println("<p></p>");
-					out.println("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-							+ "<input  type=\"submit\" name=\"submission\" value=\"Evaluate Assignment\"><br>");
+					out.println("<input  type=\"submit\" name=\"submission\" value=\"Evaluate Assignment\"><br>");
 				%>
 			</form>
 		</fieldset>
