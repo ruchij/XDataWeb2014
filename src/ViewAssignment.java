@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import database.DatabaseConnection;
 import database.DatabaseProperties;
 
 /**
@@ -288,34 +289,17 @@ public class ViewAssignment extends HttpServlet {
 		}
 	}
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 		
-		
-		DatabaseProperties dbp=new DatabaseProperties();
-		String loginUser = dbp.getUsername1(); //change user name according to your db user
-		String loginPasswd = dbp.getPasswd1(); //change user passwd according to your db user passwd
-		String hostname= dbp.getHostname();
-		String dbName= dbp.getDbName();
-		String port = dbp.getPortNumber();
+		DatabaseConnection db = new DatabaseConnection();
 		
 		try {
-			Class.forName("org.postgresql.Driver");
-		} catch (ClassNotFoundException e1) {
-			e1.printStackTrace();
-		}
-		String loginUrl = "jdbc:postgresql://" + hostname + ":" + port + "/" + dbName;
-		try {
-			dbCon = DriverManager.getConnection(loginUrl, loginUser, loginPasswd);
+			dbCon = db.graderConnection();
 			if(dbCon!=null){
 				System.out.println("Connected successfullly");
-
 			}
-		}catch (SQLException ex) {
+		}catch (Exception ex) {
 			System.err.println("SQLException: " + ex.getMessage());
 		}
-		
-		
-		
 		
 		HttpSession session=request.getSession();
 		String uname=(String) session.getAttribute("user_id");
@@ -324,7 +308,7 @@ public class ViewAssignment extends HttpServlet {
 		String assignments="Select * from assignment";
 		//Connection dbCon=(Connection) session.getAttribute("dbConnection");
 		if(dbCon==null)
-			dbCon=(new database.DatabseConnection()).dbConnection(hostname, dbName, loginUser, loginPasswd, port);
+			dbCon=(new database.DatabaseConnection()).graderConnection();
 		try {
 			PreparedStatement pstmt=dbCon.prepareStatement(assignments);
 			ResultSet rs=pstmt.executeQuery();

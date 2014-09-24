@@ -1,7 +1,7 @@
 <%@ page import="java.io.*"%>
 <%@ page import="java.util.*"%>
 <%@page import="java.sql.*"%>
-<%@page import="database.DatabseConnection"%>
+<%@page import="database.DatabaseConnection"%>
 <%@page import="database.DatabaseProperties"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
@@ -11,82 +11,11 @@
  <link rel="stylesheet" href="css/structure.css" type="text/css"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <script type="text/javascript" src="scripts/wufoo.js"></script>
-<link rel="stylesheet" href="css/structure.css" type="text/css" />
-<link rel="stylesheet" href="css/form.css" type="text/css" />
-<link rel="stylesheet" href="css/theme.css" type="text/css" />
 <link rel="canonical"
 	href="http://www.wufoo.com/gallery/designs/template.html">
 <title>Upload Sample Data</title>
 <style>
-/*Defaults Styling*/
 
-
-textarea,select {
-	font: 12px/12px Arial, Helvetica, sans-serif;
-	padding: 0;
-}
-
-input {
-	font: 15px/15px Arial, Helvetica, sans-serif;
-	padding: 0;
-}
-
-fieldset.action {
-	background: #9da2a6;
-	border-color: #e5e5e5 #797c80 #797c80 #e5e5e5;
-	margin-top: -20px;
-}
-
-
-label {
-	font-size: 15px;
-	font-weight: bold;
-	color: #666;
-}
-
-label.opt {
-	font-weight: normal;
-}
-
-dl {
-	clear: both;
-}
-
-dt {
-	float: left;
-	text-align: right;
-	width: 90px;
-	line-height: 25px;
-	margin: 0 10px 10px 0;
-}
-
-dd {
-	float: left;
-	width: 475px;
-	line-height: 25px;
-	margin: 0 0 10px 0;
-}
-
-#footer {
-	font-size: 11px;
-}
-
-#container {
-	width: 100%;
-	margin: 0 auto;
-}
-
-label span,.required {
-	color: red;
-	font-weight: bold;
-	text-align: left;
-	font-size: 17px;
-}
-
-.stop-scrolling {
-	height: 100%;
-	overflow: hidden;
-}
 </style>
 <script>
 	function checkValue1() {
@@ -122,10 +51,8 @@ label span,.required {
 	<div>
 
 
-		<form class="wufoo" name="dataForm" enctype="multipart/form-data"
+		<form name="dataForm" enctype="multipart/form-data"
 			action="dataUpload.jsp" method="post">
-
-			<p class="required">* Required</p>
 
 			<div class="fieldset">
 				<fieldset>
@@ -135,55 +62,49 @@ label span,.required {
 						<label class="field">Upload the SQL script containing the
 							initial data </label>
 					</p>
-					<p></p>
 
 					<%
-						//get database properties
-						DatabaseProperties dbp = new DatabaseProperties();
-						String username = dbp.getUsername1();
-						String username2 = dbp.getUsername2();
-						String passwd = dbp.getPasswd1();
-						String passwd2 = dbp.getPasswd2();
-						String hostname = dbp.getHostname();
-						String dbName = dbp.getDbName();
-						String port = dbp.getPortNumber();
+						if (session.getAttribute("LOGIN_USER") == null || !session.getAttribute("LOGIN_USER").equals("ADMIN")) {
+										response.sendRedirect("index.html");
+										return;
+									}
 
-						//get the connection for testing1
-						Connection dbcon = (new DatabseConnection()).dbConnection(hostname, dbName, username, passwd, port);
+									//get the connection for testing1
+									Connection dbcon = (new DatabaseConnection()).graderConnection();
 
-						try {
+									try {
 
-							PreparedStatement stmt;
-							stmt = dbcon
-									.prepareStatement("SELECT schema_id,schema_name FROM schemainfo WHERE course_id = ?");
-							stmt.setString(1, (String) (String) request.getSession()
-									.getAttribute("context_label"));
-							
+										PreparedStatement stmt;
+										stmt = dbcon
+												.prepareStatement("SELECT schema_id,schema_name FROM schemainfo WHERE course_id = ?");
+										stmt.setString(1, (String) (String) request.getSession()
+												.getAttribute("context_label"));
+										
 
-							String output = "";
-							ResultSet rs = stmt.executeQuery();
-							while (rs.next()) {
-								output += " <option value = \"" + rs.getInt("schema_id")
-										+ "\"> " + rs.getInt("schema_id") + "-"
-										+ rs.getString("schema_name") + " </option> ";
-							} 
-							
-							rs.close();
+										String output = "";
+										ResultSet rs = stmt.executeQuery();
+										while (rs.next()) {
+											output += " <option value = \"" + rs.getInt("schema_id")
+													+ "\"> " + rs.getInt("schema_id") + "-"
+													+ rs.getString("schema_name") + " </option> ";
+										} 
+										
+										rs.close();
 
-							
+										
 
-							out.println("<label style=\"text-align:left;float:left;\"><strong>Schema Name</strong></label> <br/> ");
-							out.println(" <select name=\"schemaid\" required> " + output
-									+ "</select> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp");
-							out.println("<label class=\"field\"><span>*</span>Choose File: </label> <input	type=\"file\" required name=\"dataFile\" size=\"20\"> <input name=\"submit\" onclick=\"return checkValue1();\" type=\"submit\"	id=\"upload\" value=\"Upload\">");
-						} catch (Exception err) {
+										out.println("<label style=\"text-align:left;float:left;\"><strong>Schema Name</strong></label> <br/> ");
+										out.println(" <select name=\"schemaid\" required> " + output
+												+ "</select> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp");
+										out.println("<label class=\"field\"><span>*</span>Choose File: </label> <input	type=\"file\" required name=\"dataFile\" size=\"20\"> <input name=\"submit\" onclick=\"return checkValue1();\" type=\"submit\"	id=\"upload\" value=\"Upload\">");
+									} catch (Exception err) {
 
-							err.printStackTrace();
-							out.println("<p style=\"color:red;font-size: 17px;\">Error in retrieving schema file details<p>");
-						}
-						finally{
-							dbcon.close();
-						}
+										err.printStackTrace();
+										out.println("<p style=\"color:red;font-size: 17px;\">Error in retrieving schema file details<p>");
+									}
+									finally{
+										dbcon.close();
+									}
 					%>
 					
 				</fieldset>

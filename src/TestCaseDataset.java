@@ -145,29 +145,7 @@ public class TestCaseDataset extends HttpServlet {
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
-				
-				/*String cmd="/home/mahesh/UploadDataset.sh "+rs.getString("datasetid")+" "+"A"+assignment_id+"Q"+question_id;
-				Process p2 = Runtime.getRuntime().exec(cmd);
-		        
-		        BufferedReader stdInput1 = new BufferedReader(new 
-		             InputStreamReader(p2.getInputStream()));
-
-		        BufferedReader stdError1 = new BufferedReader(new 
-		             InputStreamReader(p2.getErrorStream()));
-
-		        // read the output from the command
-		        System.out.println("Here is the standard output of the command:\n");
-		        while ((s = stdInput1.readLine()) != null) {
-		            System.out.println(s);
-		        }
-		        
-		        // read any errors from the attempted command
-		        System.out.println("Here is the standard error of the command (if any):\n");
-		        while ((s = stdError1.readLine()) != null) {
-		            System.out.println(s);
-		        }*/
-		       
+				}		       
 		        
 				out_assignment.println("<h4>Dataset ID: "+rs.getString("datasetid")+"</h4>");
 				out_assignment.println("<p></p>");

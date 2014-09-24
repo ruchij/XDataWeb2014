@@ -43,17 +43,20 @@ function addRow0(tableID) {
 	buttonnode.setAttribute('id',"button ".concat(rowCount));
 	buttonnode.setAttribute('onclick','report(this,1)' );
 	cell4.appendChild(buttonnode);
-
-	
-
 }
 
 function report(btn,selected) {
+	
 
 	//alert(btn.name.split(" "));
 	var qid = btn.name.split(" ")[1];
 	var asID = btn.name.split(" ")[2];
 	var quer = "query ".concat(qid).concat(" ").concat('1');
+	
+	if(window.editor != undefined){
+		document.getElementById(quer).innerHTML = window.editor.getValue();
+	}
+	
 	var que = document.getElementById(quer).value;
 	var desc = document.getElementById("quesTxt".concat(qid)).value;
 	if (selected == "1") {

@@ -4,7 +4,7 @@
 <%@ page import="java.util.*"%>
 <%@ page import="java.text.*"%>
 <%@page import="java.sql.*"%>
-<%@page import="database.DatabseConnection"%>
+<%@page import="database.DatabaseConnection"%>
 <%@page import="database.DatabaseProperties"%>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -69,54 +69,43 @@ span,.required {
 				<legend> List of Assignments</legend>
 				<%
 					String courseID = (String) request.getSession().getAttribute(
-							"context_label");
-					String user_id = (String) request.getSession().getAttribute(
-							"user_id");
+									"context_label");
+							String user_id = (String) request.getSession().getAttribute(
+									"user_id");
+							
+							//get connection
+							Connection dbcon = (new DatabaseConnection()).graderConnection();
+							String output = "<ul>";
 
-					//get database properties
-					DatabaseProperties dbp = new DatabaseProperties();
-					String username = dbp.getUsername1(); //change user name according to your db user -testing1
-					String username2 = dbp.getUsername2();//This is for testing2
-					String passwd = dbp.getPasswd1(); //change user passwd according to your db user passwd
-					String passwd2 = dbp.getPasswd2();
-					String hostname = dbp.getHostname();
-					String dbName = dbp.getDbName();
-					String port = dbp.getPortNumber();
+							try {
+								PreparedStatement stmt;
+								stmt = dbcon
+										.prepareStatement("SELECT * FROM  assignment where courseid = ?");
+								//	stmt.setString(2, (String)request.getSession().getAttribute("context_label"));
+								stmt.setString(1, courseID);
+								ResultSet rs;
+								rs = stmt.executeQuery();
+								while (rs.next()) {
 
-					//get connection
-					Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-							dbName, username, passwd, port);
-					String output = "<ul>";
+									output += "<a class=\"header\" target=\"rightPage\" href=\"asgnmentList.jsp?assignmentid="
+											+ rs.getString("assignmentid")
+											+ "&&studentId="
+											+ user_id
+											+ "\" ><li> Assignment "
+											+ rs.getString("assignmentid") + "</li></a>";
+								}
+								rs.close();
+								output += "</ul>";
 
-					try {
-						PreparedStatement stmt;
-						stmt = dbcon
-								.prepareStatement("SELECT * FROM  assignment where courseid = ?");
-						//	stmt.setString(2, (String)request.getSession().getAttribute("context_label"));
-						stmt.setString(1, courseID);
-						ResultSet rs;
-						rs = stmt.executeQuery();
-						while (rs.next()) {
+								out.println(output);
+							} catch (Exception err) {
 
-							output += "<a class=\"header\" target=\"rightPage\" href=\"asgnmentList.jsp?assignmentid="
-									+ rs.getString("assignmentid")
-									+ "&&studentId="
-									+ user_id
-									+ "\" ><li> Assignment "
-									+ rs.getString("assignmentid") + "</li></a>";
-						}
-						rs.close();
-						output += "</ul>";
-
-						out.println(output);
-					} catch (Exception err) {
-
-						err.printStackTrace();
-						out.println("Error in getting list of assignments");
-					}
-					finally{
-						dbcon.close();
-					}
+								err.printStackTrace();
+								out.println("Error in getting list of assignments");
+							}
+							finally{
+								dbcon.close();
+							}
 				%>
 			</fieldset>
 		</div>

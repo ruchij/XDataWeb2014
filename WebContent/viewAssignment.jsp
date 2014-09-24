@@ -4,7 +4,7 @@
 <%@ page import="java.util.*"%>
 <%@page import="java.sql.*"%>
 <%@ page import="java.text.*"%>
-<%@page import="database.DatabseConnection"%>
+<%@page import="database.DatabaseConnection"%>
 <%@page import="database.DatabaseProperties"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -32,43 +32,27 @@
 <%
 	//int assignID=Integer.parseInt(request.getParameter("AssignmentID").trim());
 	String assignID = (String) request.getSession().getAttribute(
-			"resource_link_id");
+	"resource_link_id");
 	String courseID = (String) request.getSession().getAttribute(
-			"context_label");
-	//out.println("Hi"+asgnmentID);
-	//get database properties
-	DatabaseProperties dbp = new DatabaseProperties();
-	String username = dbp.getUsername1(); //change user name according to your db user -testing1
-	String username2 = dbp.getUsername2();//This is for testing2
-	String passwd = dbp.getPasswd1(); //change user passwd according to your db user passwd
-	String passwd2 = dbp.getPasswd2();
-	String hostname = dbp.getHostname();
-	String dbName = dbp.getDbName();
-	String port = dbp.getPortNumber();
+	"context_label");
 	
 	//get connection
-	Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-			dbName, username, passwd, port);
-	//FIXME Handle getting date and time from assignment table
-	//get assignment details
-	//java.sql.Date start;
-	//java.sql.Date end;
-	//java.util.Date start=new java.util.Date();
-	//java.util.Date end=new java.util.Date();
+	Connection dbcon = (new DatabaseConnection()).graderConnection();
+	
 	Timestamp start = null;
 	Timestamp end = null;
 	try {
 		PreparedStatement stmt;
 		ResultSet rs;
 		stmt = dbcon
-				.prepareStatement("SELECT * FROM  assignment where assignmentid=? and courseid=?");
+		.prepareStatement("SELECT * FROM  assignment where assignmentid=? and courseid=?");
 		stmt.setString(1, assignID);
 		stmt.setString(2, courseID);
 		rs = stmt.executeQuery();
 		while (rs.next()) {
-			start = rs.getTimestamp("starttime");
-			end = rs.getTimestamp("endtime");
-			//start=rs.getString("end_date");
+	start = rs.getTimestamp("starttime");
+	end = rs.getTimestamp("endtime");
+	//start=rs.getString("end_date");
 		}
 
 	} catch (Exception err) {
@@ -79,7 +63,7 @@
 	//now check whether current time is less than start time.Then only assignment can be edited
 	boolean yes = false;
 	SimpleDateFormat formatter = new SimpleDateFormat(
-			"yyyy-MM-dd HH:mm:ss");
+	"yyyy-MM-dd HH:mm:ss");
 	formatter.setLenient(false);
 	String ending = formatter.format(end);
 	String starting = formatter.format(start);
@@ -107,7 +91,7 @@
 		PreparedStatement stmt;
 		//stmt = dbcon.prepareStatement("SELECT * FROM  qinfo ,assignment where qinfo.assignment_id=? AND qinfo.assignment_id=assignment.assignment_id");
 		stmt = dbcon
-				.prepareStatement("SELECT * FROM  qinfo  where assignmentid=? and courseid=?");
+		.prepareStatement("SELECT * FROM  qinfo  where assignmentid=? and courseid=?");
 		stmt.setString(1, assignID);
 		stmt.setString(2, courseID);
 		ResultSet rs;
@@ -116,39 +100,39 @@
 		String description;
 		rs = stmt.executeQuery();
 		while (rs.next()) {
-			//get query details
-			qID = rs.getString("questionid");
-			query = rs.getString("correctquery");
-			description = rs.getString("querytext");
-			if (true) {
-				output += "<tr> <td> <label><input type=\"number\" name=\"qID\" size=\"4\" id=\"qID"
+	//get query details
+	qID = rs.getString("questionid");
+	query = rs.getString("correctquery");
+	description = rs.getString("querytext");
+	if (true) {
+		output += "<tr> <td> <label><input type=\"number\" name=\"qID\" size=\"4\" id=\"qID"
+				+ qID
+				+ "\" value=\""
+				+ qID
+				+ "\" readonly></label> </td>";
+		output += "<td> <textarea name=\"quesTxt\"  rows=\"6\" cols=\"57\" >"
+				+ description + " </textarea> </td>";
+		output += " <td><textarea name=\"query\" id=\"query"
+				+ qID + "\"rows=\"6\" cols=\"57\">" + query
+				+ " </textarea></td> ";
+		//output +="<td><input type=\"button\" value=\"Generate\" name=\"Generate\""; 
+		//output +=" onclick=\"document.forms[0].action = 'CreateCourse.jsp'; return true;\" /></td>";
+		//output+="<td> <a href=\"AssignmentChecker.jsp?assignment_id="+assignID+"&question_id="+qID+"&question_id="+qID+"&query="+query+"\" method=\" POST\"><span  style=\"font-family:arial;font-size:20px;background-color:white;\" >Generate Dataset</span> </a></td> </tr>";
+		output = output
+				.concat("<td> <input type=\"button\" id=\"button "
 						+ qID
-						+ "\" value=\""
-						+ qID
-						+ "\" readonly></label> </td>";
-				output += "<td> <textarea name=\"quesTxt\"  rows=\"6\" cols=\"57\" >"
-						+ description + " </textarea> </td>";
-				output += " <td><textarea name=\"query\" id=\"query"
-						+ qID + "\"rows=\"6\" cols=\"57\">" + query
-						+ " </textarea></td> ";
-				//output +="<td><input type=\"button\" value=\"Generate\" name=\"Generate\""; 
-				//output +=" onclick=\"document.forms[0].action = 'CreateCourse.jsp'; return true;\" /></td>";
-				//output+="<td> <a href=\"AssignmentChecker.jsp?assignment_id="+assignID+"&question_id="+qID+"&question_id="+qID+"&query="+query+"\" method=\" POST\"><span  style=\"font-family:arial;font-size:20px;background-color:white;\" >Generate Dataset</span> </a></td> </tr>";
-				output = output
-						.concat("<td> <input type=\"button\" id=\"button "
-								+ qID
-								+ "\" value=\"Generate Dataset\" onclick=\"submitter(this,'queryTable')\"> </td></tr>"
-								+ "\n");
-			}
-			//this else is dead code--not needed
-			else {
-				output += "<tr> <td> <label><input type=\"number\" name=\"qID\" size=\"4\" id=\"qID\" value=\""
-						+ qID + "\" readonly></label> </td>";
-				output += "<td> <textarea name=\"quesTxt\" rows=\"6\" cols=\"57\" readonly>"
-						+ description + " </textarea> </td>";
-				output += " <td><textarea name=\"query\" rows=\"6\" cols=\"57\" readonly>"
-						+ query + " </textarea></td> </tr>";
-			}
+						+ "\" value=\"Generate Dataset\" onclick=\"submitter(this,'queryTable')\"> </td></tr>"
+						+ "\n");
+	}
+	//this else is dead code--not needed
+	else {
+		output += "<tr> <td> <label><input type=\"number\" name=\"qID\" size=\"4\" id=\"qID\" value=\""
+				+ qID + "\" readonly></label> </td>";
+		output += "<td> <textarea name=\"quesTxt\" rows=\"6\" cols=\"57\" readonly>"
+				+ description + " </textarea> </td>";
+		output += " <td><textarea name=\"query\" rows=\"6\" cols=\"57\" readonly>"
+				+ query + " </textarea></td> </tr>";
+	}
 		}
 		
 		rs.close();
@@ -276,7 +260,7 @@
 	out.println("<form class=\"wufoo\" name=\"queryForm\" action=\"UpdateExistingAssignment.jsp\" method=\"post\" onsubmit=\"return(validate());\" >");
 	out.println("<label style=\"font-family:arial;color:red;font-size:20px;\"><strong>Asssignment ID</strong></label>");
 	out.println("<label><input type=\"number\" name=\"AssignmentID\" size=\"30\" id=\"NOQ\" value=\""
-			+ assignID + "\" readonly ></label><br/>");
+	+ assignID + "\" readonly ></label><br/>");
 	out.println("<label style=\"font-family:arial;color:red;font-size:20px;\"><strong>Start Date</strong></label>");
 
 	//printing start date and time
@@ -285,45 +269,45 @@
 	String[] startTime = Starting[1].split(":");
 	//start year
 	String[] month = { "", "January", "February", "March", "April",
-			"May", "June", "July", "August", "September", "October",
-			"November", "December" };
+	"May", "June", "July", "August", "September", "October",
+	"November", "December" };
 
 	String startmonth = "<select name=\"startmonth\"  > " + "\n";
 	for (int i = 1; i <= 12; i++) {
 		//out.println(i+" "+month[i]+" "+startYear[1]+" "+String.format("%02d",Integer.parseInt("0"+Integer.toString(i)))+" "+String.format("%02d",Integer.parseInt("0"+Integer.toString(i))).equals(startYear[1]) +"<br/>");
 		if (i < 10
-				&& !(String.format("%02d",
-						Integer.parseInt("0" + Integer.toString(i)))
-						.equals(startYear[1])))
-			startmonth += "<option value=\"" + '0' + (i) + "\">"
-					+ month[i] + "</option>" + "\n";
+		&& !(String.format("%02d",
+				Integer.parseInt("0" + Integer.toString(i)))
+				.equals(startYear[1])))
+	startmonth += "<option value=\"" + '0' + (i) + "\">"
+			+ month[i] + "</option>" + "\n";
 		else if (i != (Integer.parseInt(startYear[1])))
-			startmonth += "<option value=\"" + (i) + "\">" + month[i]
-					+ "</option>" + "\n";
+	startmonth += "<option value=\"" + (i) + "\">" + month[i]
+			+ "</option>" + "\n";
 		else if (i < 10
-				&& String.format("%02d",
-						Integer.parseInt("0" + Integer.toString(i)))
-						.equals(startYear[1]))
-			startmonth += "<option value=\"" + '0' + (i)
-					+ "\" selected>" + month[i] + "</option>" + "\n";
+		&& String.format("%02d",
+				Integer.parseInt("0" + Integer.toString(i)))
+				.equals(startYear[1]))
+	startmonth += "<option value=\"" + '0' + (i)
+			+ "\" selected>" + month[i] + "</option>" + "\n";
 		else if (i == (Integer.parseInt(startYear[1])))
-			startmonth += "<option value=\"" + (i) + "\" selected>"
-					+ month[i] + "</option>" + "\n";
+	startmonth += "<option value=\"" + (i) + "\" selected>"
+			+ month[i] + "</option>" + "\n";
 	}
 	startmonth += "</select>";
 
 	String startyear = "  <select name=\"startyear\"  > " + "\n";
 	String[] year = { "2012", "2013", "2014", "2015", "2016", "2017",
-			"2018", "2019", "2020" };
+	"2018", "2019", "2020" };
 
 	for (int i = 0; i < 9; i++) {
 		if (year[i].equals(startYear[0]))
-			startyear += " <option value=\"" + startYear[0]
-					+ "\" selected>" + startYear[0] + "</option> "
-					+ "\n";
+	startyear += " <option value=\"" + startYear[0]
+			+ "\" selected>" + startYear[0] + "</option> "
+			+ "\n";
 		else
-			startyear += " <option value=\"" + year[i] + "\">"
-					+ year[i] + "</option>" + "\n";
+	startyear += " <option value=\"" + year[i] + "\">"
+			+ year[i] + "</option>" + "\n";
 	}
 	startyear += "</select>";
 
@@ -334,23 +318,23 @@
 		//out.println(i+" "+String.format("%02d",Integer.parseInt("0"+Integer.toString(i)))+" "+String.format("%02d",Integer.parseInt("0"+Integer.toString(i))).equals(startYear[1]) +"<br/>");
 
 		if (i < 10
-				&& !(String.format("%02d",
-						Integer.parseInt("0" + Integer.toString(i)))
-						.equals(startYear[2])))
-			startday += " <option value=\"" + '0' + i + "\">" + i
-					+ "</option>" + "\n";
+		&& !(String.format("%02d",
+				Integer.parseInt("0" + Integer.toString(i)))
+				.equals(startYear[2])))
+	startday += " <option value=\"" + '0' + i + "\">" + i
+			+ "</option>" + "\n";
 		else if (i < 10
-				&& String.format("%02d",
-						Integer.parseInt("0" + Integer.toString(i)))
-						.equals(startYear[2]))
-			startday += " <option value=\"" + '0' + i + "\" selected>"
-					+ i + "</option>" + "\n";
+		&& String.format("%02d",
+				Integer.parseInt("0" + Integer.toString(i)))
+				.equals(startYear[2]))
+	startday += " <option value=\"" + '0' + i + "\" selected>"
+			+ i + "</option>" + "\n";
 		else if (i != (Integer.parseInt(startYear[2])))
-			startday += " <option value=\"" + i + "\" >" + i
-					+ "</option>" + "\n";
+	startday += " <option value=\"" + i + "\" >" + i
+			+ "</option>" + "\n";
 		else if (i == (Integer.parseInt(startYear[2])))
-			startday += " <option value=\"" + i + "\" selected>" + i
-					+ "</option>" + "\n";
+	startday += " <option value=\"" + i + "\" selected>" + i
+			+ "</option>" + "\n";
 	}
 	startday += "</select>" + "\n";
 
@@ -359,63 +343,63 @@
 	boolean ampm = false;
 	boolean done = false;
 	if (Integer.parseInt(startTime[0]) == 0
-			|| Integer.parseInt(startTime[0]) > 12) {
+	|| Integer.parseInt(startTime[0]) > 12) {
 		ampm = true;
 		if (Integer.parseInt(startTime[0]) != 0)
-			hour = Integer.toString(Integer.parseInt(hour) - 12);
+	hour = Integer.toString(Integer.parseInt(hour) - 12);
 		else {
-			//starthour += " <option value=\"12\">12</option>"+"\n";
-			done = true;
+	//starthour += " <option value=\"12\">12</option>"+"\n";
+	done = true;
 		}
 	}
 	for (int i = 1; i < 13; i++) {
 		if (i < 10
-				&& !(String.format("%01d",
-						Integer.parseInt(Integer.toString(i)))
-						.equals(hour)))
-			starthour += " <option value=\"" + '0' + i + "\">" + '0'
-					+ i + "</option>" + "\n";
+		&& !(String.format("%01d",
+				Integer.parseInt(Integer.toString(i)))
+				.equals(hour)))
+	starthour += " <option value=\"" + '0' + i + "\">" + '0'
+			+ i + "</option>" + "\n";
 		else if (i < 10
-				&& (String.format("%02d",
-						Integer.parseInt("0" + Integer.toString(i)))
-						.equals(hour)))
-			starthour += " <option value=\"" + '0' + i + "\" selected>"
-					+ '0' + i + "</option>" + "\n";
+		&& (String.format("%02d",
+				Integer.parseInt("0" + Integer.toString(i)))
+				.equals(hour)))
+	starthour += " <option value=\"" + '0' + i + "\" selected>"
+			+ '0' + i + "</option>" + "\n";
 		else if (i != (Integer.parseInt(hour))
-				&& (i != 12 || done != true)) {
-			starthour += " <option value=\"" + i + "\" >" + i
-					+ "</option>" + "\n";
-			//System.out.println("hello");
+		&& (i != 12 || done != true)) {
+	starthour += " <option value=\"" + i + "\" >" + i
+			+ "</option>" + "\n";
+	//System.out.println("hello");
 		} else if (i == (Integer.parseInt(hour))
-				&& (i != 12 || done != true))
-			starthour += " <option value=\"" + i + "\" selected>" + i
-					+ "</option>" + "\n";
+		&& (i != 12 || done != true))
+	starthour += " <option value=\"" + i + "\" selected>" + i
+			+ "</option>" + "\n";
 		else if (done = true && i == 12)
-			starthour += " <option value=\"12\" selected>12</option>"
-					+ "\n";
+	starthour += " <option value=\"12\" selected>12</option>"
+			+ "\n";
 	}
 	starthour += "</select>" + "\n";
 
 	String startmin = " <select name=\"startmin\"  > " + "\n";
 	for (int i = 0; i < 60; i += 10) {
 		if (i == 0
-				&& !(String.format("%02d",
-						Integer.parseInt("0" + Integer.toString(i)))
-						.equals(startTime[1])))
-			startmin += " <option value=\"" + '0' + i + "\" >" + '0'
-					+ i + "</option>" + "\n";
+		&& !(String.format("%02d",
+				Integer.parseInt("0" + Integer.toString(i)))
+				.equals(startTime[1])))
+	startmin += " <option value=\"" + '0' + i + "\" >" + '0'
+			+ i + "</option>" + "\n";
 		else if (i == 0
-				&& (String.format("%02d",
-						Integer.parseInt("0" + Integer.toString(i)))
-						.equals(startTime[1])))
-			startmin += " <option value=\"" + '0' + i + "\" selected>"
-					+ '0' + i + "</option>" + "\n";
+		&& (String.format("%02d",
+				Integer.parseInt("0" + Integer.toString(i)))
+				.equals(startTime[1])))
+	startmin += " <option value=\"" + '0' + i + "\" selected>"
+			+ '0' + i + "</option>" + "\n";
 		else if (i != (Integer.parseInt(startTime[1])))
-			startmin += " <option value=\"" + i + "\" >" + i
-					+ "</option>" + "\n";
+	startmin += " <option value=\"" + i + "\" >" + i
+			+ "</option>" + "\n";
 		else if (i == (Integer.parseInt(startTime[1])))
-			startmin += " <option value=\"" + i + "\" selected>" + i
-					+ "</option>" + "\n";
+	startmin += " <option value=\"" + i + "\" selected>" + i
+			+ "</option>" + "\n";
 	}
 	startmin += "</select>" + "\n";
 
@@ -431,13 +415,13 @@
 	/*
 	for(int i=1;i<13;i++){
 		if(i<10 && !(String.format("%02d",Integer.parseInt("0"+Integer.toString(i)) ).equals(startTime[0])) )
-			starthour += " <option value=\""+'0'+i+"\">"+'0'+i+"</option>"+"\n";
+	starthour += " <option value=\""+'0'+i+"\">"+'0'+i+"</option>"+"\n";
 		else if(i<10 && (String.format("%02d",Integer.parseInt("0"+Integer.toString(i)) ).equals(startTime[0])) )
-			starthour += " <option value=\""+'0'+i+"\" selected>"+'0'+i+"</option>"+"\n";
+	starthour += " <option value=\""+'0'+i+"\" selected>"+'0'+i+"</option>"+"\n";
 		else if ( i!=(Integer.parseInt(startTime[0])) )
-			starthour +=" <option value=\""+i+"\" >"+i+"</option>"+"\n";
+	starthour +=" <option value=\""+i+"\" >"+i+"</option>"+"\n";
 		else if ( i ==(Integer.parseInt(startTime[0])) )
-			starthour +=" <option value=\""+i+"\" selected>"+i+"</option>"+"\n";    	
+	starthour +=" <option value=\""+i+"\" selected>"+i+"</option>"+"\n";    	
 	}
 	starthour +="</select>";
 	 */
@@ -446,14 +430,14 @@
 		//out.println("<label><input type=\"datetime\" name=\"startTime\" size=\"30\" id=\"start\" value=\""+start+"\" ></label><br/>");
 
 		out.println(startday + "&nbsp" + startmonth + "&nbsp"
-				+ startyear + "<br/>");
+		+ startyear + "<br/>");
 		out.println("<label style=\"font-family:arial;color:red;font-size:20px;\"><strong>Start Time</strong></label>");
 		out.println(starthour + "&nbsp" + startmin + "&nbsp"
-				+ startampm + "<br/>");
+		+ startampm + "<br/>");
 	} else
 		//dead code
 		out.println("<label><input type=\"datetime\" name=\"startTime\" size=\"30\" id=\"start\" value=\""
-				+ start + "\" readonly></label><br/>");
+		+ start + "\" readonly></label><br/>");
 
 	//printing end date and time
 	String[] Ending = ending.split(" ");
@@ -464,23 +448,23 @@
 	for (int i = 1; i <= 12; i++) {
 		//out.println(i+" "+month[i]+" "+startYear[1]+" "+String.format("%02d",Integer.parseInt("0"+Integer.toString(i)))+" "+String.format("%02d",Integer.parseInt("0"+Integer.toString(i))).equals(startYear[1]) +"<br/>");
 		if (i < 10
-				&& !(String.format("%02d",
-						Integer.parseInt("0" + Integer.toString(i)))
-						.equals(endYear[1])))
-			endmonth += "<option value=\"" + '0' + (i) + "\">"
-					+ month[i] + "</option>" + "\n";
+		&& !(String.format("%02d",
+				Integer.parseInt("0" + Integer.toString(i)))
+				.equals(endYear[1])))
+	endmonth += "<option value=\"" + '0' + (i) + "\">"
+			+ month[i] + "</option>" + "\n";
 		else if (i != (Integer.parseInt(endYear[1])))
-			endmonth += "<option value=\"" + (i) + "\">" + month[i]
-					+ "</option>" + "\n";
+	endmonth += "<option value=\"" + (i) + "\">" + month[i]
+			+ "</option>" + "\n";
 		else if (i < 10
-				&& String.format("%02d",
-						Integer.parseInt("0" + Integer.toString(i)))
-						.equals(endYear[1]))
-			endmonth += "<option value=\"" + '0' + (i) + "\" selected>"
-					+ month[i] + "</option>" + "\n";
+		&& String.format("%02d",
+				Integer.parseInt("0" + Integer.toString(i)))
+				.equals(endYear[1]))
+	endmonth += "<option value=\"" + '0' + (i) + "\" selected>"
+			+ month[i] + "</option>" + "\n";
 		else if (i == (Integer.parseInt(endYear[1])))
-			endmonth += "<option value=\"" + (i) + "\" selected>"
-					+ month[i] + "</option>" + "\n";
+	endmonth += "<option value=\"" + (i) + "\" selected>"
+			+ month[i] + "</option>" + "\n";
 	}
 	endmonth += "</select>" + "\n";
 
@@ -488,11 +472,11 @@
 
 	for (int i = 0; i < 9; i++) {
 		if (year[i].equals(endYear[0]))
-			endyear += " <option value=\"" + endYear[0]
-					+ "\" selected>" + endYear[0] + "</option> " + "\n";
+	endyear += " <option value=\"" + endYear[0]
+			+ "\" selected>" + endYear[0] + "</option> " + "\n";
 		else
-			endyear += " <option value=\"" + year[i] + "\">" + year[i]
-					+ "</option>" + "\n";
+	endyear += " <option value=\"" + year[i] + "\">" + year[i]
+			+ "</option>" + "\n";
 	}
 	endyear += "</select>" + "\n";
 
@@ -503,23 +487,23 @@
 		//out.println(i+" "+String.format("%02d",Integer.parseInt("0"+Integer.toString(i)))+" "+String.format("%02d",Integer.parseInt("0"+Integer.toString(i))).equals(startYear[1]) +"<br/>");
 
 		if (i < 10
-				&& !(String.format("%02d",
-						Integer.parseInt("0" + Integer.toString(i)))
-						.equals(endYear[2])))
-			endday += " <option value=\"" + '0' + i + "\">" + i
-					+ "</option>" + "\n";
+		&& !(String.format("%02d",
+				Integer.parseInt("0" + Integer.toString(i)))
+				.equals(endYear[2])))
+	endday += " <option value=\"" + '0' + i + "\">" + i
+			+ "</option>" + "\n";
 		else if (i < 10
-				&& String.format("%02d",
-						Integer.parseInt("0" + Integer.toString(i)))
-						.equals(endYear[2]))
-			endday += " <option value=\"" + '0' + i + "\" selected>"
-					+ i + "</option>" + "\n";
+		&& String.format("%02d",
+				Integer.parseInt("0" + Integer.toString(i)))
+				.equals(endYear[2]))
+	endday += " <option value=\"" + '0' + i + "\" selected>"
+			+ i + "</option>" + "\n";
 		else if (i != (Integer.parseInt(endYear[2])))
-			endday += " <option value=\"" + i + "\" >" + i
-					+ "</option>" + "\n";
+	endday += " <option value=\"" + i + "\" >" + i
+			+ "</option>" + "\n";
 		else if (i == (Integer.parseInt(endYear[2])))
-			endday += " <option value=\"" + i + "\" selected>" + i
-					+ "</option>" + "\n";
+	endday += " <option value=\"" + i + "\" selected>" + i
+			+ "</option>" + "\n";
 	}
 	endday += "</select>" + "\n";
 
@@ -528,58 +512,58 @@
 	ampm = false;
 	done = false;
 	if (Integer.parseInt(endTime[0]) == 0
-			|| Integer.parseInt(endTime[0]) > 12) {
+	|| Integer.parseInt(endTime[0]) > 12) {
 		ampm = true;
 		if (Integer.parseInt(endTime[0]) != 0)
-			hour = Integer.toString(Integer.parseInt(hour) - 12);
+	hour = Integer.toString(Integer.parseInt(hour) - 12);
 		else
-			done = true;
+	done = true;
 	}
 	for (int i = 1; i < 13; i++) {
 		if (i < 10
-				&& !(String.format("%02d",
-						Integer.parseInt("0" + Integer.toString(i)))
-						.equals(hour)))
-			endhour += " <option value=\"" + '0' + i + "\">" + '0' + i
-					+ "</option>" + "\n";
+		&& !(String.format("%02d",
+				Integer.parseInt("0" + Integer.toString(i)))
+				.equals(hour)))
+	endhour += " <option value=\"" + '0' + i + "\">" + '0' + i
+			+ "</option>" + "\n";
 		else if (i < 10
-				&& (String.format("%02d",
-						Integer.parseInt("0" + Integer.toString(i)))
-						.equals(hour)))
-			endhour += " <option value=\"" + '0' + i + "\" selected>"
-					+ '0' + i + "</option>" + "\n";
+		&& (String.format("%02d",
+				Integer.parseInt("0" + Integer.toString(i)))
+				.equals(hour)))
+	endhour += " <option value=\"" + '0' + i + "\" selected>"
+			+ '0' + i + "</option>" + "\n";
 		else if (i != (Integer.parseInt(hour))
-				&& (i != 12 || done != true))
-			endhour += " <option value=\"" + i + "\" >" + i
-					+ "</option>" + "\n";
+		&& (i != 12 || done != true))
+	endhour += " <option value=\"" + i + "\" >" + i
+			+ "</option>" + "\n";
 		else if (i == (Integer.parseInt(hour)))
-			endhour += " <option value=\"" + i + "\" selected>" + i
-					+ "</option>" + "\n";
+	endhour += " <option value=\"" + i + "\" selected>" + i
+			+ "</option>" + "\n";
 		else if (i == 12 && done == true)
-			endhour += "<option value=\"12\" selected>12</option>";
+	endhour += "<option value=\"12\" selected>12</option>";
 	}
 	endhour += "</select>" + "\n";
 
 	String endmin = " <select name=\"endmin\"  > " + "\n";
 	for (int i = 0; i < 60; i += 10) {
 		if (i == 0
-				&& !(String.format("%02d",
-						Integer.parseInt("0" + Integer.toString(i)))
-						.equals(endTime[1])))
-			endmin += " <option value=\"" + '0' + i + "\" >" + '0' + i
-					+ "</option>" + "\n";
+		&& !(String.format("%02d",
+				Integer.parseInt("0" + Integer.toString(i)))
+				.equals(endTime[1])))
+	endmin += " <option value=\"" + '0' + i + "\" >" + '0' + i
+			+ "</option>" + "\n";
 		if (i == 0
-				&& (String.format("%02d",
-						Integer.parseInt("0" + Integer.toString(i)))
-						.equals(endTime[1])))
-			endmin += " <option value=\"" + '0' + i + "\" selected>"
-					+ '0' + i + "</option>" + "\n";
+		&& (String.format("%02d",
+				Integer.parseInt("0" + Integer.toString(i)))
+				.equals(endTime[1])))
+	endmin += " <option value=\"" + '0' + i + "\" selected>"
+			+ '0' + i + "</option>" + "\n";
 		else if (i != (Integer.parseInt(endTime[1])))
-			endmin += " <option value=\"" + i + "\" >" + i
-					+ "</option>" + "\n";
+	endmin += " <option value=\"" + i + "\" >" + i
+			+ "</option>" + "\n";
 		else if (i == (Integer.parseInt(endTime[1])))
-			endmin += " <option value=\"" + i + "\" selected>" + i
-					+ "</option>" + "\n";
+	endmin += " <option value=\"" + i + "\" selected>" + i
+			+ "</option>" + "\n";
 	}
 	endmin += "</select>" + "\n";
 
@@ -597,14 +581,14 @@
 	if (true) {//if(yes) 
 		//out.println("<label><input type=\"datetime\" name=\"endTime\" size=\"30\" id=\"end\" value=\""+end+"\" ></label><br/>");
 		out.println(endday + "&nbsp" + endmonth + "&nbsp" + endyear
-				+ "<br/>");
+		+ "<br/>");
 		out.println("<label style=\"font-family:arial;color:red;font-size:20px;\"><strong>End Time</strong></label>");
 		out.println(endhour + "&nbsp" + endmin + "&nbsp" + endampm
-				+ "<br/>");
+		+ "<br/>");
 	} else
 		//dead code
 		out.println("<label><input type=\"datetime\" name=\"endTime\" size=\"30\" id=\"end\" value=\""
-				+ end + "\" readonly></label><br/>");
+		+ end + "\" readonly></label><br/>");
 
 	out.println("<h3  style=\"font-family:arial;color:red;font-size:20px;background-color:white;\" >Following is the list of queries in the assignment</h3>");
 	//String ht="alert ("+str+")";

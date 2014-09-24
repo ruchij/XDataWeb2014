@@ -13,54 +13,15 @@
 <title>List Of Questions</title>
 <style>
 
-
-
-textarea,select {
-	font: 12px/12px Arial, Helvetica, sans-serif;
-	padding: 0;
+.separator{
+	border-right:1px solid black; 
+	margin:0px; 
+	float: right; 
+	margin-right: 3px;
+	width:1px;
+	margin-left: 2px;
 }
 
-input {
-	font: 15px/15px Arial, Helvetica, sans-serif;
-	padding: 0;
-}
-
-fieldset.action {
-	background: #9da2a6;
-	border-color: #e5e5e5 #797c80 #797c80 #e5e5e5;
-	margin-top: -20px;
-}
-
-
-label {
-	font-size: 15px;
-	font-weight: bold;
-	color: #666;
-}
-
-label span,.required {
-	color: red;
-	font-weight: bold;
-	font-size: 17px;
-}
-
-td {
-	text-align: center;
-	vertical-align: middle;
-}
-
-a:link {
-	color: #E96D63;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* unvisited link */
-a:hover {
-	color: #7FCA9F;
-	font: 15px/15px Arial, Helvetica, sans-serif;
-} /* mouse over link */
-.stop-scrolling {
-	height: 100%;
-	overflow: hidden;
-}
 </style>
 <script type="text/javascript" src="scripts/ManageQuery.js"></script>
 
@@ -76,6 +37,12 @@ a:hover {
 			<fieldset>
 				<legend> Assignment Instructions</legend>
 				<%
+				
+					if (session.getAttribute("LOGIN_USER") == null || !session.getAttribute("LOGIN_USER").equals("ADMIN")) {
+						response.sendRedirect("index.html");
+						return;
+					}
+					
 					String assignID = (String) request.getParameter("AssignmentID");
 					String courseID = (String) request.getSession().getAttribute(
 							"context_label");
@@ -85,121 +52,112 @@ a:hover {
 					out.println(instructions);
 				%>
 			</fieldset>
-
+			<br/>
 			<fieldset>
 				<legend> List of Questions</legend>
 
 				<%
-					//out.println("Hi"+asgnmentID);
-					//get database properties
-					DatabaseProperties dbp = new DatabaseProperties();
-					String username = dbp.getUsername1(); //change user name according to your db user -testing1
-					String username2 = dbp.getUsername2();//This is for testing2
-					String passwd = dbp.getPasswd1(); //change user passwd according to your db user passwd
-					String passwd2 = dbp.getPasswd2();
-					String hostname = dbp.getHostname();
-					String dbName = dbp.getDbName();
-					String port = dbp.getPortNumber();
-					
-					//get connection
-					Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-							dbName, username, passwd, port);
+							//get connection
+							Connection dbcon = (new DatabaseConnection()).graderConnection();
 
-					Timestamp start = null;
-					Timestamp end = null;
-					try {
-						PreparedStatement stmt;
-						ResultSet rs = null;
-						stmt = dbcon
-								.prepareStatement("SELECT * FROM  assignment where assignmentid=? and courseid=?");
-						stmt.setString(1, assignID);
-						stmt.setString(2, courseID);
-						rs = stmt.executeQuery();
-						if (rs.next()) {
-							start = rs.getTimestamp("starttime");
-							end = rs.getTimestamp("endtime");
-							//start=rs.getString("end_date");
-						}
-						
-						rs.close();
+							Timestamp start = null;
+							Timestamp end = null;
+							try {
+								PreparedStatement stmt;
+								ResultSet rs = null;
+								stmt = dbcon
+										.prepareStatement("SELECT * FROM  assignment where assignmentid=? and courseid=?");
+								stmt.setString(1, assignID);
+								stmt.setString(2, courseID);
+								rs = stmt.executeQuery();
+								if (rs.next()) {
+									start = rs.getTimestamp("starttime");
+									end = rs.getTimestamp("endtime");
+									//start=rs.getString("end_date");
+								}
+								
+								rs.close();
 
-					} catch (Exception err) {
-						err.printStackTrace();
-						out.println("Error in retrieving list of questions");
+							} catch (Exception err) {
+								err.printStackTrace();
+								out.println("Error in retrieving list of questions");
 
-					}
+							}
 
-					System.out.println("Start :" + start);
-					System.out.println("End :" + end);
-					//now check whether current time is less than start time.Then only assignment can be edited
-					boolean yes = false;
-					SimpleDateFormat formatter = new SimpleDateFormat(
-							"yyyy-MM-dd HH:mm:ss");
-					formatter.setLenient(false);
-					//String ending = formatter.format(end);
-					//String starting = formatter.format(start);
-					//String oldTime = "2012-07-11 10:55:21";
-					//java.util.Date oldDate = formatter.parse(ending);
-					//get current date
-					Calendar c = Calendar.getInstance();
+							System.out.println("Start :" + start);
+							System.out.println("End :" + end);
+							//now check whether current time is less than start time.Then only assignment can be edited
+							boolean yes = false;
+							SimpleDateFormat formatter = new SimpleDateFormat(
+									"yyyy-MM-dd HH:mm:ss");
+							formatter.setLenient(false);
+							
+							Calendar c = Calendar.getInstance();
 
-					String currentDate = formatter.format(c.getTime());
-					java.util.Date current = formatter.parse(currentDate);
+							String currentDate = formatter.format(c.getTime());
+							java.util.Date current = formatter.parse(currentDate);
+							String output = "<table  cellspacing=\"20\"  class=\"authors-list\" id=\"queryTable\" align=\"center\"> <tr> <th >Question ID</th>       <th >Question Description</th>  <th >Correct Query</th> <th> </th></tr>";
+							try {
+								PreparedStatement stmt;
+								stmt = dbcon
+										.prepareStatement("SELECT * FROM  qinfo  where assignmentid=? and courseid=? order by questionid");
+								stmt.setString(1, assignID);
+								stmt.setString(2, courseID);
+								ResultSet rs = stmt.executeQuery();
 
-					//compare times
-					/*if (current.compareTo(oldDate) < 0) {
-						yes = true;
-					}*/
+								while (rs.next()) {
 
-					String output = "<table  cellspacing=\"20\"  class=\"authors-list\" id=\"queryTable\" align=\"center\"> <tr> <th >Question ID</th>       <th >Question Description</th>  <th >Correct Query</th> <th> </th></tr>";
-					try {
-						PreparedStatement stmt;
-						//stmt = dbcon.prepareStatement("SELECT * FROM  qinfo ,assignment where qinfo.assignment_id=? AND qinfo.assignment_id=assignment.assignment_id");
-						stmt = dbcon
-								.prepareStatement("SELECT * FROM  qinfo  where assignmentid=? and courseid=? order by questionid");
-						stmt.setString(1, assignID);
-						stmt.setString(2, courseID);
-						ResultSet rs = stmt.executeQuery();
+									String qID = rs.getString("questionid");
+									String desc = rs.getString("querytext");
+									String correctQuery = rs.getString("correctquery");
+									System.out.println(qID + ": " + correctQuery);
 
-						while (rs.next()) {
+									String remote = "QuestionDetails.jsp?AssignmentID="
+											+ assignID + "&&courseId=" + courseID
+											+ "&&questionId=" + qID
+											+ "'\"target = \"rightPage\"";
 
-							String qID = rs.getString("questionid");
-							String desc = rs.getString("querytext");
-							String correctQuery = rs.getString("correctquery");
-							System.out.println(qID + ": " + correctQuery);
+									String generate = "AssignmentChecker?assignment_id="
+											+ assignID + "&&question_id=" + qID + "&&query="
+											+ CommonFunctions.encodeURIComponent(correctQuery) + "'\"target = \"rightPage\"";
 
-							String remote = "QuestionDetails.jsp?AssignmentID="
-									+ assignID + "&&courseId=" + courseID
-									+ "&&questionId=" + qID
-									+ "'\"target = \"rightPage\"";
-
-							String generate = "AssignmentChecker?assignment_id="
-									+ assignID + "&&question_id=" + qID + "&&query="
-									+ CommonFunctions.encodeURIComponent(correctQuery) + "'\"target = \"rightPage\"";
-
-							output += "<tr class=\""
-									+ qID
-									+ "\"><td>Question: "
-									+ qID
-									+ "</td>"
-									+ "<td>"
-									+ desc
-									+ "</td>"
-									+ "<td>"
-									+ correctQuery
-									+ "</td>"
-									+ "<td><input type=\"button\" onClick=\"window.location.href='"
-									+ remote
-									+ " value=\"Edit\" > <br/> \n "
-									+ "<input type=\"button\" onClick=\"window.location.href='"
-									+ generate
-									+ " value=\"Generate Dataset\" > <br/> \n "
-									//+"DATA SET GENERATION STATUS, depending on this enable generate dataset button"
-									+ "</td>" + "</tr>";
+									output += "<tr class=\""
+											+ qID
+											+ "\"><td>Question: "
+											+ qID
+											+ "</td>"
+											+ "<td>"
+											+ desc
+											+ "</td>"
+											+ "<td>"
+											+ correctQuery
+											+ "</td>"
+											+ "<td><input type=\"button\" onClick=\"window.location.href='"
+											+ remote
+											+ " value=\"Edit\" > <br/> \n "
+											+ "<input type=\"button\" onClick=\"window.location.href='"
+											+ generate
+											+ " value=\"Generate Dataset\" > <br/> \n "
+											//+"DATA SET GENERATION STATUS, depending on this enable generate dataset button"
+											+ "</td>" + "</tr>";
+				%>
+							
+							<div class="questionelement">
+								<div class="question"><span>Q<%= qID %>. </span><%= desc %></div>
+								<div class="answer"><span>Ans. </span><%= CommonFunctions.encodeHTML(correctQuery) %></div>
+								<div class="editbutton"><a href=' <%=remote %>'>
+								<%="Edit" %></a>
+								<span class = "separator">&nbsp;</span>
+								<span></span>
+								<a href=' <%=generate %>'><%="Generate Dataset" %></a></div>
+								
+							</div>
+						<%
 
 						}
 						
 						rs.close();
+						output = "";
 					} catch (Exception err) {
 						err.printStackTrace();
 						out.println("Error in retriveing query details");
@@ -207,8 +165,7 @@ a:hover {
 					finally{
 						dbcon.close();
 					}
-
-					output += "</table>";
+					
 					output += "<input  type=\"button\" id=\"quer\" onClick=\"addRow(" + assignID + ",'queryTable')\" value=\"Add Question\" align=\"right\">";
 					out.println(output);
 				%>

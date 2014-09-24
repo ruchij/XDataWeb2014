@@ -45,6 +45,13 @@ public class AssignmentChecker extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		
+		HttpSession session=request.getSession();
+		
+		if (session.getAttribute("LOGIN_USER") == null || !session.getAttribute("LOGIN_USER").equals("ADMIN")) {
+			response.sendRedirect("index.html");
+			return;
+		}
+		
 		int assignment_id = Integer.parseInt(request.getParameter("assignment_id"));
 		int question_id = Integer.parseInt(request.getParameter("question_id"));
 		//int query_id = Integer.parseInt(request.getParameter("query_id"));
@@ -61,7 +68,7 @@ public class AssignmentChecker extends HttpServlet {
 		System.out.println("Question-Id "+question_id);
 		System.out.println("Query :"+query);
 		
-		HttpSession session=request.getSession();
+		
 		session.setAttribute("question_id", question_id);
 		session.setAttribute("assignment_id", assignment_id);
 		DatabaseProperties dbp=new DatabaseProperties();
@@ -120,28 +127,6 @@ public class AssignmentChecker extends HttpServlet {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		
-		/*String command2="/home/mahesh/generateDataset.sh "+assignment_id+" "+question_id;
-		System.out.println(command2);
-		Process p = Runtime.getRuntime().exec(command2);
-        
-        BufferedReader stdInput = new BufferedReader(new 
-             InputStreamReader(p.getInputStream()));
-
-        BufferedReader stdError = new BufferedReader(new 
-             InputStreamReader(p.getErrorStream()));
-
-        // read the output from the command
-        System.out.println("Here is the standard output of the command:\n");
-        while ((s = stdInput.readLine()) != null) {
-            System.out.println(s);
-        }
-        
-        // read any errors from the attempted command
-        System.out.println("Here is the standard error of the command (if any):\n");
-        while ((s = stdError.readLine()) != null) {
-            System.out.println(s);
-        }*/
        	
 		dbp=new DatabaseProperties();
 		loginUser = dbp.getUsername2(); //change user name according to your db user
@@ -214,28 +199,6 @@ public class AssignmentChecker extends HttpServlet {
 			{
 				String args1[] = {rs.getString("datasetid"), "A"+assignment_id+"Q"+question_id};
 				PopulateTestData.entry(args1);
-				
-				/*String cmd="/home/mahesh/UploadDataset.sh "+rs.getString("datasetid")+" "+"A"+assignment_id+"Q"+question_id;
-				Process p2 = Runtime.getRuntime().exec(cmd);
-		        
-		        BufferedReader stdInput1 = new BufferedReader(new 
-		             InputStreamReader(p2.getInputStream()));
-
-		        BufferedReader stdError1 = new BufferedReader(new 
-		             InputStreamReader(p2.getErrorStream()));
-
-		        // read the output from the command
-		        System.out.println("Here is the standard output of the command:\n");
-		        while ((s = stdInput1.readLine()) != null) {
-		            System.out.println(s);
-		        }
-		        
-		        // read any errors from the attempted command
-		        System.out.println("Here is the standard error of the command (if any):\n");
-		        while ((s = stdError1.readLine()) != null) {
-		            System.out.println(s);
-		        }*/
-		       
 		        
 				out_assignment.println("<h4>"+rs.getString("tag")+"</h4>");
 				out_assignment.println("<p></p>");

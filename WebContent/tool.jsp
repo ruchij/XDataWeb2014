@@ -14,7 +14,7 @@
 <%@ page import="net.oauth.server.OAuthServlet"%>
 <%@ page import="net.oauth.signature.OAuthSignatureMethod"%>
 <%@page import="java.sql.*"%>
-<%@page import="database.DatabseConnection"%>
+<%@page import="database.DatabaseConnection"%>
 <%@page import="database.DatabaseProperties"%>
 
 <%
@@ -38,56 +38,56 @@
 		oam = OAuthServlet.getMessage(request, null);
 
 		String oauth_consumer_key = request
-				.getParameter("oauth_consumer_key");
+		.getParameter("oauth_consumer_key");
 		if (oauth_consumer_key == null) {
-			out.println("<b>Missing oauth_consumer_key</b>\n");
-			return;
+	out.println("<b>Missing oauth_consumer_key</b>\n");
+	return;
 		}
 
 		cons = null;
 		if ("iitb.ac.in".equals(oauth_consumer_key)) {
-			cons = new OAuthConsumer("http://moodle.iitb.ac.in/",
-					"iitb.ac.in", "xd387sec", null);
-			//} else if ( "12345".equals(oauth_consumer_key) ) {
-			//cons = new OAuthConsumer("http://call.back.url.com/", "12345", "secret", null);
+	cons = new OAuthConsumer("http://moodle.iitb.ac.in/",
+			"iitb.ac.in", "xd387sec", null);
+	//} else if ( "12345".equals(oauth_consumer_key) ) {
+	//cons = new OAuthConsumer("http://call.back.url.com/", "12345", "secret", null);
 		} else {
-			out.println("<b>oauth_consumer_key=" + oauth_consumer_key
-					+ " not found.</b>\n");
-			return;
+	out.println("<b>oauth_consumer_key=" + oauth_consumer_key
+			+ " not found.</b>\n");
+	return;
 		}
 
 		userId = request.getParameter("user_id");
 		name = request.getParameter("lis_person_name_full");
 		email = request
-				.getParameter("lis_person_contact_email_primary");
+		.getParameter("lis_person_contact_email_primary");
 
 		acc = new OAuthAccessor(cons);
 		System.out.println("Req :"
-				+ request.getParameter("lis_person_name_full"));
+		+ request.getParameter("lis_person_name_full"));
 		session.setAttribute("user_id", userId);
 		session.setAttribute("context_label",
-				request.getParameter("context_label"));
+		request.getParameter("context_label"));
 		session.setAttribute("resource_link_id",
-				request.getParameter("resource_link_id"));
+		request.getParameter("resource_link_id"));
 		session.setAttribute("lis_result_sourcedid",
-				request.getParameter("lis_result_sourcedid"));
+		request.getParameter("lis_result_sourcedid"));
 		session.setAttribute("lis_outcome_service_url",
-				request.getParameter("lis_outcome_service_url"));
+		request.getParameter("lis_outcome_service_url"));
 		session.setAttribute("lis_person_name_full", name);
 		session.setAttribute("lis_person_contact_email_primary", email);
 		session.setAttribute("roles", request.getParameter("roles"));
 	} else {
 
-		if (session.getAttribute("LOGIN_USER") == "ADMIN") {
-			userId = "007";
-			name = "Instructor";
-			email = "instructor@icde.com";
-			role = "instructor";
+		if (session.getAttribute("LOGIN_USER") != null && session.getAttribute("LOGIN_USER").equals("ADMIN")) {
+	userId = "007";
+	name = "Instructor";
+	email = "instructor@icde.com";
+	role = "instructor";
 		} else {
-			userId = "14";
-			name = "Student";
-			email = "student@icde.com";
-			role = "student";
+	userId = "14";
+	name = "Student";
+	email = "student@icde.com";
+	role = "student";
 		}
 		
 		session.setAttribute("user_id", userId);
@@ -102,24 +102,22 @@
 		DatabaseProperties properties = new DatabaseProperties();
 		Connection dbcon = null;
 
-		dbcon = (new DatabseConnection()).dbConnection(
-				properties.getHostname(), properties.getDbName(),
-				properties.getUsername1(), properties.getPasswd1(), properties.getPortNumber());
+		dbcon = (new DatabaseConnection()).graderConnection();
 
 		PreparedStatement stmt;
 		ResultSet rs = null;
 		stmt = dbcon
-				.prepareStatement("SELECT * FROM  users where id=?");
+		.prepareStatement("SELECT * FROM  users where id=?");
 		stmt.setString(1, userId);
 		rs = stmt.executeQuery();
 
 		if (!rs.next()) {
-			stmt = dbcon
-					.prepareStatement("INSERT INTO users VALUES(?, ?, ?)");
-			stmt.setString(1, userId);
-			stmt.setString(2, name);
-			stmt.setString(3, email);
-			stmt.executeUpdate();
+	stmt = dbcon
+			.prepareStatement("INSERT INTO users VALUES(?, ?, ?)");
+	stmt.setString(1, userId);
+	stmt.setString(2, name);
+	stmt.setString(3, email);
+	stmt.executeUpdate();
 		}
 
 		stmt.close();
@@ -133,14 +131,14 @@
 	if (DEBUG == 0) {
 
 		try {
-			out.println("\n<b>Base Message</b>\n</pre><p>\n");
-			out.println(OAuthSignatureMethod.getBaseString(oam));
-			out.println("<pre>\n");
-			oav.validateMessage(oam, acc);
-			out.println("Message validated");
+	out.println("\n<b>Base Message</b>\n</pre><p>\n");
+	out.println(OAuthSignatureMethod.getBaseString(oam));
+	out.println("<pre>\n");
+	oav.validateMessage(oam, acc);
+	out.println("Message validated");
 		} catch (Exception e) {
-			out.println("<b>Error while valdating message:</b>\n");
-			out.println(e);
+	out.println("<b>Error while valdating message:</b>\n");
+	out.println(e);
 		}
 	}
 

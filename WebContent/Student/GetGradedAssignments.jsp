@@ -4,7 +4,7 @@
 <%@ page import="java.util.*"%>
 <%@ page import="java.text.*"%>
 <%@page import="java.sql.*"%>
-<%@page import="database.DatabseConnection"%>
+<%@page import="database.DatabaseConnection"%>
 <%@page import="database.DatabaseProperties"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -69,83 +69,72 @@ a:hover {
 				<legend> List of Completed Assignments</legend>
 				<%
 					String courseID = (String) request.getSession().getAttribute(
-							"context_label");
-					String user_id = (String) request.getSession().getAttribute(
-							"user_id");
+									"context_label");
+							String user_id = (String) request.getSession().getAttribute(
+									"user_id");
 
-					//get database properties
-					DatabaseProperties dbp = new DatabaseProperties();
-					String username = dbp.getUsername1(); //change user name according to your db user -testing1
-					String username2 = dbp.getUsername2();//This is for testing2
-					String passwd = dbp.getPasswd1(); //change user passwd according to your db user passwd
-					String passwd2 = dbp.getPasswd2();
-					String hostname = dbp.getHostname();
-					String dbName = dbp.getDbName();
-					String port = dbp.getPortNumber();
+							//get connection
+							Connection dbcon = (new DatabaseConnection()).graderConnection();
+							String output = "<ul>";
+							SimpleDateFormat formatter = new SimpleDateFormat(
+									"yyyy-MM-dd HH:mm:ss");
+							formatter.setLenient(false);
+							try {
+								PreparedStatement stmt;
+								stmt = dbcon
+										.prepareStatement("SELECT * FROM  assignment where courseid = ?");
+								//	stmt.setString(2, (String)request.getSession().getAttribute("context_label"));
+								stmt.setString(1, courseID);
+								ResultSet rs;
+								rs = stmt.executeQuery();
+								while (rs.next()) {
 
-					//get connection
-					Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-							dbName, username, passwd, port);
-					String output = "<ul>";
-					SimpleDateFormat formatter = new SimpleDateFormat(
-							"yyyy-MM-dd HH:mm:ss");
-					formatter.setLenient(false);
-					try {
-						PreparedStatement stmt;
-						stmt = dbcon
-								.prepareStatement("SELECT * FROM  assignment where courseid = ?");
-						//	stmt.setString(2, (String)request.getSession().getAttribute("context_label"));
-						stmt.setString(1, courseID);
-						ResultSet rs;
-						rs = stmt.executeQuery();
-						while (rs.next()) {
+									/**check if its deadline is over or not*/
+									String endTime = "";
 
-							/**check if its deadline is over or not*/
-							String endTime = "";
+									endTime = formatter.format(rs.getTimestamp("endtime"));
 
-							endTime = formatter.format(rs.getTimestamp("endtime"));
+									//get current date
+									Calendar c = Calendar.getInstance();
 
-							//get current date
-							Calendar c = Calendar.getInstance();
+									String currentDate = formatter.format(c.getTime());
+									java.util.Date current = formatter.parse(currentDate);
+									//compare times
 
-							String currentDate = formatter.format(c.getTime());
-							java.util.Date current = formatter.parse(currentDate);
-							//compare times
+									java.util.Date oldDate = formatter.parse(endTime);
 
-							java.util.Date oldDate = formatter.parse(endTime);
+									
+									//now check whether current time is more than end time.Then only assignment can be graded
+									if (oldDate.compareTo(current) < 0) {
 
-							
-							//now check whether current time is more than end time.Then only assignment can be graded
-							if (oldDate.compareTo(current) < 0) {
+										output += "<a href=\"/xdata/ViewAssignment?assignmentid="
+												+ rs.getString("assignmentid").trim()
+												+ "V"
+												+ "\" target = \"rightPage\">"
+												+ "<li> Assignment "
+												+ rs.getString("assignmentid") + "</li></a>";
+									}
+									/* 			
+										output += "<a class=\"header\" target=\"rightPage\" href=\"asgnmentList.jsp?assignmentid="
+												+ rs.getString("assignmentid")
+												+ " &&studentId="
+												+ user_id
+												+ "\" ><li> Assignment "
+												+ rs.getString("assignmentid") + "</li></a>"; */
+								}
+								rs.close();
 
-								output += "<a href=\"/xdata/ViewAssignment?assignmentid="
-										+ rs.getString("assignmentid").trim()
-										+ "V"
-										+ "\" target = \"rightPage\">"
-										+ "<li> Assignment "
-										+ rs.getString("assignmentid") + "</li></a>";
+								output += "</ul>";
+
+								out.println(output);
+							} catch (Exception err) {
+
+								err.printStackTrace();
+								out.println("Error in getting list of assignments");
 							}
-							/* 			
-								output += "<a class=\"header\" target=\"rightPage\" href=\"asgnmentList.jsp?assignmentid="
-										+ rs.getString("assignmentid")
-										+ " &&studentId="
-										+ user_id
-										+ "\" ><li> Assignment "
-										+ rs.getString("assignmentid") + "</li></a>"; */
-						}
-						rs.close();
-
-						output += "</ul>";
-
-						out.println(output);
-					} catch (Exception err) {
-
-						err.printStackTrace();
-						out.println("Error in getting list of assignments");
-					}
-					finally{
-						dbcon.close();
-					}
+							finally{
+								dbcon.close();
+							}
 				%>
 			</fieldset>
 		</div>
