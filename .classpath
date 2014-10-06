@@ -14,7 +14,7 @@
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/oauth-1.4.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/unboundid-ldapsdk-se.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/xdata.jar" sourcepath="/XData/"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-6-openjdk-amd64">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk7">
 		<attributes>
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>

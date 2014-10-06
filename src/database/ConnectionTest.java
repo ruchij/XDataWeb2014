@@ -22,8 +22,8 @@ public class ConnectionTest {
 		//String dbName = dbp.getDbName();
 
 		//get connection
-		Connection dbcon = (new DatabseConnection()).dbConnection("localhost:8432",
-				"sonu", "testing1", "testing1");
+		Connection dbcon = (new DatabseConnection()).dbConnection("localhost",
+				"sonu", "testing1", "testing1","8432");
 		String output = "<ul>";
 
 		try {

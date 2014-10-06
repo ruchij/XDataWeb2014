@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-15">
+<title>Developer Setup</title>
+</head>
+
+<body>
+<h3>The developer mode allows for setting up the tool in an IDE such as Eclipse.</h3>
+
+<ol>
+  <li>Download XData.tar.gz and extract it using the following command<br /><pre>	tar zxfv XData.tar.gz</pre></li>
+  <li>Download json-simple.jar and place it in the WebContent/WEB-INF/lib folder.</li>
+  <li>Download and install Postgresql. Setup the database.</li>
+  <li>Install Eclipse EE Edition (Juno or better) and JDK 1.6/1.7. Set up the appropriate environment variables and try running SimpleTest.java
+<pre>
+public class SimpleTest {
+    public static void main(String[] args) {
+	System.out.println("This works!");
+    }
+}</pre></li>
+  <li>Open Eclipse and click on Window->Preferences->Java->Installed JREs. Make sure JDK 1.6 or more is there. If it not there, click on Add to add it and then mark it as the default JRE.</li>
+  <li>Click on File->Import and under Java->Existing Projects into workspace. Browse to the root of XData directory and click Add.</li>
+  <li>Go to Window->Show View->Others and select Servers. Click on add a new server. Select Tomcat 7.0 and set it up. In the end, add XData to the Tomcat Server projects and close the window.</li>
+  <li>In tool.jsp set the debug flag to 1, i.e. debug = 1, to run the project without the need of integrating with Moodle.</li>
+  <li>Build your project, and open the following URL in the browser
+  <pre>
+localhost:8080/XDataWeb2013/Empty.html</pre></li>
+</ol>
+
+<h4> <u> Links </u> </h4>
+<a href="Readme_Admin.html" target="_blank"> Admin Setup</a> <br />
+<a href="Readme_Inst_Setup.html" target="_blank"> Instructor Setup</a> <br />
+<a href="Readme_Inst_Usage.html" target="_blank"> Instructor Usage</a> <br />
+<a href="Readme_Student.html" target="_blank"> Student Usage</a> <br />
+<hr>
+<address></address>
+<!-- hhmts start -->Last modified: Mon Oct  6 15:44:42 IST 2014 <!-- hhmts end -->
+</body> </html>
