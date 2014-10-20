@@ -116,7 +116,7 @@ a:active {
 					String courseID = (String) request.getSession().getAttribute(
 							"context_label");
 					String instructions = (new CommonFunctions())
-							.getAssignmentDetails(courseID, assignID);
+							.getAssignmnetIinstructions(courseID, assignID);
 					
 					out.println(instructions);
 				%>
@@ -181,11 +181,11 @@ a:active {
 	
 	//get database properties
 	DatabaseProperties dbp = new DatabaseProperties();
-	String username = dbp.getUser1Name(); //change user name according to your db user -testing1
-	String username2 = dbp.getUser2Name();//This is for testing2
-	String passwd = dbp.getPassword1(); //change user passwd according to your db user passwd
-	String passwd2 = dbp.getPassword2();
-	String hostname = dbp.getHostName();
+	String username = dbp.getUsername1(); //change user name according to your db user -testing1
+	String username2 = dbp.getUsername2();//This is for testing2
+	String passwd = dbp.getPasswd1(); //change user passwd according to your db user passwd
+	String passwd2 = dbp.getPasswd2();
+	String hostname = dbp.getHostname();
 	String dbName = dbp.getDbName();
 
 	//get the assignment ID after updating the assignment table
@@ -194,7 +194,7 @@ a:active {
 	Connection dbcon = null;
 
 	dbcon = (new DatabseConnection()).dbConnection(hostname, dbName,
-			username, passwd);
+			username, passwd,"5432");
 	boolean err = false;
 	
 	if (!err)

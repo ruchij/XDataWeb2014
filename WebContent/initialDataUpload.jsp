@@ -18,9 +18,11 @@
 
 </style>
 <script>
+var schid="";
 	function checkValue1() {
-
-		if (document.getElementById("upload").value != "") {
+		 schid = document.getElementById("schemaid");
+		 //alert(schid);
+		 if (document.getElementById("upload").value != "") {
 			return true;
 		} else {
 			alert("Please upload file");
@@ -97,6 +99,7 @@
 										out.println(" <select name=\"schemaid\" required> " + output
 												+ "</select> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp");
 										out.println("<label class=\"field\"><span>*</span>Choose File: </label> <input	type=\"file\" required name=\"dataFile\" size=\"20\"> <input name=\"submit\" onclick=\"return checkValue1();\" type=\"submit\"	id=\"upload\" value=\"Upload\">");
+										System.out.println("initial data upload sucessful");	
 									} catch (Exception err) {
 
 										err.printStackTrace();
@@ -104,6 +107,7 @@
 									}
 									finally{
 										dbcon.close();
+						//System.out.println("initial data upload sucessful");				
 									}
 					%>
 					

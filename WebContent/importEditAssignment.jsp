@@ -260,7 +260,7 @@ label span,.required {
 					String oldAssignID = (String) request.getParameter("assignment_id");
 					String oldCourseID = (String) request.getParameter("course_id");
 					System.out.println("Assignment:"+oldAssignID+" Course:"+oldCourseID);
-					String instructions = (new CommonFunctions()).getAssignmentDetails(oldCourseID, oldAssignID);
+					String instructions = (new CommonFunctions()).getAssignmnetIinstructions(oldCourseID, oldAssignID);
 					
 					out.println(instructions);
 					
@@ -287,16 +287,16 @@ label span,.required {
 								"context_label");
 						//get database properties
 						DatabaseProperties dbp = new DatabaseProperties();
-						String username = dbp.getUser1Name();
-						String username2 = dbp.getUser2Name();
-						String passwd = dbp.getPassword1();
-						String passwd2 = dbp.getPassword2();
-						String hostname = dbp.getHostName();
+						String username = dbp.getUsername1();
+						String username2 = dbp.getUsername2();
+						String passwd = dbp.getPasswd1();
+						String passwd2 = dbp.getPasswd2();
+						String hostname = dbp.getHostname();
 						String dbName = dbp.getDbName();
 
 						//get the connection for testing1
 						Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-								dbName, username, passwd);
+								dbName, username, passwd,"5432");
 
 						try {
 

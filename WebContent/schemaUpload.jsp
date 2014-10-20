@@ -101,7 +101,8 @@ label span,.required {
 			//store the data in a file
 			String saveFile = "";
 			int x = 0;
-
+			String data="";
+			String filename="";
 			String contentType = request.getContentType();
 			//here we are checking the content type is not equal to Null and as well as the passed data from mulitpart/form-data is greater than or equal to 0
 			if ((contentType != null)
@@ -142,36 +143,104 @@ label span,.required {
 			int endPos = ((file.substring(0, boundaryLocation))
 					.getBytes()).length;
 			//LINUX style of specifying the folder name
+			 filename=new String(saveFile);
 			saveFile = "/tmp/" + saveFile;
 			File ff = new File(saveFile);
 
 			// creating a new file with the same name and writing the content in new file
 			FileOutputStream fileOut = new FileOutputStream(ff);
 			fileOut.write(dataBytes, startPos, (endPos - startPos));
+			/* byte dataBytes2[]=null;
+			for(int i=0;i<(endPos-startPos);i++)
+			{
+				dataBytes2[i]=dataBytes[startPos+i];
+			} */
+			data=new String(dataBytes);
+			data=data.substring(startPos,endPos);
+			//System.out.println("New Data"+data);
+			data=data.replaceAll("(?i)create( )+table","create temporary table");
+		
 			fileOut.flush();
 			fileOut.close();
+			//String data2=new String(dataBytes,"UTF-8");
+			/* BufferedReader reader = new BufferedReader(
+	                new FileReader("/tmp/"+saveFile));
+	       String line;
+	        while((line=reader.readLine()) != null){
+	            //String readData = String.valueOf(buf, 0, numRead);
+	            data.concat(line);
+	        }
+	        reader.close(); */
+			//data=s;
+			//System.out.println("After file making"+s);
 		} catch (Exception err) {
 			err.printStackTrace();
 		}
-
+			}
+		//Insert in database-R
+		 Connection dbcon=(new DatabaseConnection()).graderConnection();
+	
+	try{
+		
+		PreparedStatement stmt,xstmt;
+    	//xstmt = dbcon.prepareStatement("SET role testing1");
+    	//xstmt.executeUpdate("set role testing1");
+    	stmt = dbcon.prepareStatement("SELECT max(schema_id) from schemainfo");
+    	
+		int max_schema_id;
+    	String output = "";
+    	ResultSet rs = stmt.executeQuery();
+    	while(rs.next())
+    	{
+    		if(rs.getString("max")==null)
+    		{
+    			max_schema_id=0;
+    			
+    		}
+    		else
+    		{
+    			max_schema_id=rs.getInt("max");
+    		}
+    		//String data=new String(dataBytes);
+    		int next_id =max_schema_id+1;
+    		String nextid=Integer.toString(next_id);
+    		//System.out.println("max schema id:"+max_schema_id);
+    		String courseid=(String) request.getSession().getAttribute("context_label");
+    		System.out.println("courseid:"+courseid);
+    		stmt = dbcon.prepareStatement("insert into schemainfo(course_id,schema_id,schema_name,ddltext) values(?,?,?,?)");
+    		stmt.setString(1,courseid);
+    		stmt.setString(2,nextid);
+    		stmt.setString(3,filename);
+    		stmt.setString(4,data);
+    		stmt.execute();
+    	}
+	}catch(Exception e){
+		System.out.println("Error in insert database code");
+		e.printStackTrace();}
+		//Insert close
 		//Now execute the script in the database
 
-		ArrayList<String> listOfQueries = (new FileToSql())
+		/* ArrayList<String> listOfQueries = (new FileToSql())
 				.createQueries(saveFile);
 		String[] inst = listOfQueries.toArray(new String[listOfQueries
-				.size()]);
+				.size()]); */
 		//get the connection for testing1
-		Connection dbcon = (new DatabaseConnection()).graderConnection();
-
+		//Connection dbcon = (new DatabaseConnection()).graderConnection();
+//creating table. not using it 
+/*
 		try {
-			PreparedStatement stmt;
+			PreparedStatement stmt1;
 			for (int i = 0; i < inst.length; i++) {
+				//System.out.println("Error1");
 				// we ensure that there is no spaces before or after the request string  
 				// in order to not execute empty statements  
 				if (!inst[i].trim().equals("")) {
-					stmt = dbcon.prepareStatement(inst[i] + ";");
+					//System.out.println("Error2");
+					stmt1 = dbcon.prepareStatement(inst[i] + ";");
 					//stmt.setString(1, inst[i]+";");
-					stmt.executeUpdate();
+					System.out.println("Error3");
+					stmt1.executeUpdate();
+					System.out.println("Error4");
 					//System.out.println(inst[i]+";");
 				}
 			}
@@ -181,7 +250,7 @@ label span,.required {
 			err.printStackTrace();
 			x = 1;
 			//System.exit(1);
-		}
+		}*/
 		dbcon.close();
 		/*	
 			//now execute this script for testing2
@@ -214,12 +283,13 @@ label span,.required {
 			out.println("<p > You have successfully uploaded the file </p> ");
 			//   out.println(saveFile);
 
-		}
+		
 			} else {
 
 		out.println("<p > Error in file uploading. please verify it! </p> ");
 
 			}
+			
 	%>
 </body>
 </html>

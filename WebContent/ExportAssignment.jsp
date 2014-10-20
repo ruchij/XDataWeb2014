@@ -145,16 +145,16 @@ a:active {
 					String assignment_id = (String) request.getParameter("assignment_id");
 				    //get database properties
 					DatabaseProperties dbp = new DatabaseProperties();
-					String username = dbp.getUser1Name(); //change user name according to your db user -testing1
-					String username2 = dbp.getUser2Name();//This is for testing2
-					String passwd = dbp.getPassword1(); //change user passwd according to your db user passwd
-					String passwd2 = dbp.getPassword2();
-					String hostname = dbp.getHostName();
+					String username = dbp.getUsername2(); //change user name according to your db user -testing1
+					String username2 = dbp.getUsername2();//This is for testing2
+					String passwd = dbp.getPasswd1(); //change user passwd according to your db user passwd
+					String passwd2 = dbp.getPasswd2();
+					String hostname = dbp.getHostname();
 					String dbName = dbp.getDbName();
 
 					//get connection
 					Connection dbcon = (new DatabseConnection()).dbConnection(hostname,
-							dbName, username, passwd);
+							dbName, username, passwd,"5432");
 					String output = "<ul>";
 								
 					try {
