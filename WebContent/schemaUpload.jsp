@@ -159,7 +159,8 @@ label span,.required {
 			data=data.substring(startPos,endPos);
 			//System.out.println("New Data"+data);
 			data=data.replaceAll("(?i)create(\\s)+table","create temporary table");
-		System.out.println("data  test:"+data);
+			data=data.replaceAll("'","''");					
+			System.out.println("data  test:"+data);
 			//fileOut.flush();
 			//fileOut.close();
 			//String data2=new String(dataBytes,"UTF-8");
@@ -179,7 +180,7 @@ label span,.required {
 			}
 		//Insert in database-R
 		 Connection dbcon=(new DatabaseConnection()).graderConnection();
-	
+	int i=1;
 	try{
 		
 		PreparedStatement stmt,xstmt;
@@ -208,13 +209,15 @@ label span,.required {
     		//System.out.println("max schema id:"+max_schema_id);
     		String courseid=(String) request.getSession().getAttribute("context_label");
     		System.out.println("courseid:"+courseid);
-    		stmt = dbcon.prepareStatement("insert into schemainfo(course_id,schema_id,schema_name,ddltext) values(?,?,?,||?||)");
+    		stmt = dbcon.prepareStatement("insert into schemainfo(course_id,schema_id,schema_name,ddltext) values(?,?,?,?)");
     		stmt.setString(1,courseid);
     		stmt.setString(2,nextid);
     		stmt.setString(3,filename);
     		stmt.setString(4,data);
     		//System.out.println(stmt.);
     		stmt.execute();
+    		i=0;
+    		
     	}
 	}catch(Exception e){
 		System.out.println("Error in insert database code");
@@ -280,16 +283,16 @@ label span,.required {
 			}
 			dbcon.close();
 		 */
-		if (x == 0) {
+		if (i == 0) {
 			//printing data
 
-			out.println("<p > You have successfully uploaded the file </p> ");
+			out.println("<font color=blue><p> You have successfully uploaded the file </p><font> ");
 			//   out.println(saveFile);
 
 		
 			} else {
 
-		out.println("<p > Error in file uploading. please verify it! </p> ");
+		out.println("<font color=red><p> Error in file uploading. please verify it! </p></font> ");
 
 			}
 			
