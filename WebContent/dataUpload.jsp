@@ -83,7 +83,7 @@
              //System.out.println("before converting");
             data=new String(dataBytes);
             data=data.substring(startPos,endPos);
-            //System.out.println("smpledata"+data);
+           // System.out.println("smpledata"+data);
             fileOut.flush();
             fileOut.close();
           //Now execute the script in the database
@@ -140,6 +140,7 @@ System.out.println("Schemaid"+schemaId); */
            /*update this information in schema info table*/
 	            String courseid=(String) request.getSession().getAttribute("context_label");
 	        	PreparedStatement stmt1;
+	        	data=data.replaceAll("'","''");
 	        	String sql="UPDATE schemainfo SET sample_data = '"+data+"' where course_id = '"+courseid+"' and schema_id = '"+sch+"'";          
 	        	stmt1 = dbcon.prepareStatement(sql);
 	        	//stmt1.setString(1, data);
@@ -147,11 +148,8 @@ System.out.println("Schemaid"+schemaId); */
 	    		//stmt1.setString(3, sch);
 	    		int rowsaffected=stmt1.executeUpdate();
 	    		//stmt1.executeUpdate();
-	    		//System.out.println("sample:"+data);
-
-	        	
-	    		
-	        	
+	    		//System.out.println("sample:"+data);  	
+	    		        	
 	         }  
     		catch (Exception err) {
     			out.println("<p style=\"font-family:arial;color:red;font-size:20px;background-color:white;\">"+err+" </p>");

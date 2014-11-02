@@ -144,12 +144,12 @@ label span,.required {
 					.getBytes()).length;
 			//LINUX style of specifying the folder name
 			 filename=new String(saveFile);
-			saveFile = "/tmp/" + saveFile;
-			File ff = new File(saveFile);
+			//saveFile = "/tmp/" + saveFile;
+			//File ff = new File(saveFile);
 
 			// creating a new file with the same name and writing the content in new file
-			FileOutputStream fileOut = new FileOutputStream(ff);
-			fileOut.write(dataBytes, startPos, (endPos - startPos));
+			//FileOutputStream fileOut = new FileOutputStream(ff);
+			//fileOut.write(dataBytes, startPos, (endPos - startPos));
 			/* byte dataBytes2[]=null;
 			for(int i=0;i<(endPos-startPos);i++)
 			{
@@ -158,10 +158,10 @@ label span,.required {
 			data=new String(dataBytes);
 			data=data.substring(startPos,endPos);
 			//System.out.println("New Data"+data);
-			data=data.replaceAll("(?i)create( )+table","create temporary table");
-		
-			fileOut.flush();
-			fileOut.close();
+			data=data.replaceAll("(?i)create(\\s)+table","create temporary table");
+		System.out.println("data  test:"+data);
+			//fileOut.flush();
+			//fileOut.close();
 			//String data2=new String(dataBytes,"UTF-8");
 			/* BufferedReader reader = new BufferedReader(
 	                new FileReader("/tmp/"+saveFile));
@@ -185,6 +185,7 @@ label span,.required {
 		PreparedStatement stmt,xstmt;
     	//xstmt = dbcon.prepareStatement("SET role testing1");
     	//xstmt.executeUpdate("set role testing1");
+    	dbcon.setAutoCommit(false); 
     	stmt = dbcon.prepareStatement("SELECT max(schema_id) from schemainfo");
     	
 		int max_schema_id;
@@ -207,11 +208,12 @@ label span,.required {
     		//System.out.println("max schema id:"+max_schema_id);
     		String courseid=(String) request.getSession().getAttribute("context_label");
     		System.out.println("courseid:"+courseid);
-    		stmt = dbcon.prepareStatement("insert into schemainfo(course_id,schema_id,schema_name,ddltext) values(?,?,?,?)");
+    		stmt = dbcon.prepareStatement("insert into schemainfo(course_id,schema_id,schema_name,ddltext) values(?,?,?,||?||)");
     		stmt.setString(1,courseid);
     		stmt.setString(2,nextid);
     		stmt.setString(3,filename);
     		stmt.setString(4,data);
+    		//System.out.println(stmt.);
     		stmt.execute();
     	}
 	}catch(Exception e){
@@ -251,6 +253,7 @@ label span,.required {
 			x = 1;
 			//System.exit(1);
 		}*/
+		dbcon.commit();
 		dbcon.close();
 		/*	
 			//now execute this script for testing2
