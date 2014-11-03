@@ -1,3 +1,4 @@
+<%@page import="util.MyConnection"%>
 <%@ page import="java.io.*"%>
 <%@ page import="java.util.*"%>
 <%@page import="java.sql.*"%>
@@ -117,8 +118,7 @@ label span,.required {
 			int totalBytesRead = 0;
 			//this loop converting the uploaded file into byte code
 			while (totalBytesRead < formDataLength) {
-				byteRead = in.read(dataBytes, totalBytesRead,
-						formDataLength);
+				byteRead = in.read(dataBytes, totalBytesRead,formDataLength);
 				totalBytesRead += byteRead;
 			}
 			//for saving the file name
@@ -140,8 +140,7 @@ label span,.required {
 
 			int boundaryLocation = file.indexOf(boundary, pos) - 4;
 			int startPos = ((file.substring(0, pos)).getBytes()).length;
-			int endPos = ((file.substring(0, boundaryLocation))
-					.getBytes()).length;
+			int endPos = ((file.substring(0, boundaryLocation)).getBytes()).length;
 			//LINUX style of specifying the folder name
 			 filename=new String(saveFile);
 			//saveFile = "/tmp/" + saveFile;
@@ -159,7 +158,7 @@ label span,.required {
 			data=data.substring(startPos,endPos);
 			//System.out.println("New Data"+data);
 			data=data.replaceAll("(?i)create(\\s)+table","create temporary table");
-			data=data.replaceAll("'","''");					
+			//data=data.replaceAll("'","''");					
 			System.out.println("data  test:"+data);
 			//fileOut.flush();
 			//fileOut.close();
@@ -179,7 +178,7 @@ label span,.required {
 		}
 			}
 		//Insert in database-R
-		 Connection dbcon=(new DatabaseConnection()).graderConnection();
+		 Connection dbcon= MyConnection.getExistingDatabaseConnection();
 	int i=1;
 	try{
 		
@@ -188,8 +187,7 @@ label span,.required {
     	//xstmt.executeUpdate("set role testing1");
     	dbcon.setAutoCommit(false); 
     	stmt = dbcon.prepareStatement("SELECT max(schema_id) from schemainfo");
-    	
-		int max_schema_id;
+    	int max_schema_id;
     	String output = "";
     	ResultSet rs = stmt.executeQuery();
     	while(rs.next())
@@ -197,7 +195,6 @@ label span,.required {
     		if(rs.getString("max")==null)
     		{
     			max_schema_id=0;
-    			
     		}
     		else
     		{
@@ -209,12 +206,13 @@ label span,.required {
     		//System.out.println("max schema id:"+max_schema_id);
     		String courseid=(String) request.getSession().getAttribute("context_label");
     		System.out.println("courseid:"+courseid);
+    		
     		stmt = dbcon.prepareStatement("insert into schemainfo(course_id,schema_id,schema_name,ddltext) values(?,?,?,?)");
     		stmt.setString(1,courseid);
     		stmt.setString(2,nextid);
     		stmt.setString(3,filename);
     		stmt.setString(4,data);
-    		//System.out.println(stmt.);
+    		System.out.println("stmt"+stmt);
     		stmt.execute();
     		i=0;
     		
